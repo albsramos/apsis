@@ -53,3 +53,15 @@
 .selected {
   opacity: 1;
 }
+.swap {
+  display: inline-grid;
+}
+.swap > span {
+  grid-area: 1 / 1;
+}
+.off {
+  visibility: hidden;
+}
+.more {
+  font-variant-numeric: tabular-nums;
+}

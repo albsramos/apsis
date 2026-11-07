@@ -101,6 +101,15 @@
   align-items: center;
   gap: 4px;
 }
+.swap {
+  display: inline-grid;
+}
+.swap > span {
+  grid-area: 1 / 1;
+}
+.off {
+  visibility: hidden;
+}
 .scroll {
   flex: 1;
 }

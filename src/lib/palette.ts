@@ -7,7 +7,7 @@ import { heatPosition, type HeatScale } from './heat'
  */
 const NAMES = [
   'fg', 'fg-muted', 'fg-subtle', 'border', 'border-strong', 'surface', 'viz-active', 'viz-done', 'viz-warn', 'danger',
-  'heat-0', 'heat-1', 'heat-2', 'heat-3', 'heat-4', 'space', 'atmosphere', 'globe-ocean', 'globe-land', 'saa',
+  'heat-0', 'heat-1', 'heat-2', 'heat-3', 'heat-4', 'space', 'atmosphere', 'globe-ocean', 'globe-land', 'city-lights', 'saa',
 ] as const
 export type Token = (typeof NAMES)[number]
 export type Palette = Record<Token, Color>

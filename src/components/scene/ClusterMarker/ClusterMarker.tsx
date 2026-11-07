@@ -125,7 +125,10 @@ function MarkerLabel({ cluster }: { cluster: ClusterConfig }) {
       <div className={styles.more}>
         <span>{fmt.pf(s.outputPf)}</span>
         <span>{fmt.temp(Math.max(...s.modulesC))}</span>
-        <span>{s.eclipse ? 'In shadow' : 'Sunlit'}</span>
+        <span className={styles.swap}>
+          <span className={s.eclipse ? styles.off : undefined}>Sunlit</span>
+          <span className={s.eclipse ? undefined : styles.off}>In shadow</span>
+        </span>
       </div>
     </div>
   )

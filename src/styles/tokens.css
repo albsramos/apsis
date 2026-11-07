@@ -62,6 +62,8 @@
   --atmosphere: #4f8cff;
   --globe-ocean: #0a0d16;
   --globe-land: #9fb4dc;
+  /* Night-side city lights: near-white, a touch warm, never yellow (yellow means warning) */
+  --city-lights: #fff4e6;
   --saa: #93c5fd;
 }
 

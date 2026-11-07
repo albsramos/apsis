@@ -17,9 +17,14 @@ const DOT_STEP = 1.1
  * rotating frame (ground tracks, ground stations).
  */
 export function Earth({ children }: { children?: ReactNode }) {
-  const land = useTexture(`${import.meta.env.BASE_URL}textures/land_mask_1024.png`)
-  land.minFilter = LinearFilter
-  land.generateMipmaps = false
+  const [land, city] = useTexture([
+    `${import.meta.env.BASE_URL}textures/land_mask_1024.png`,
+    `${import.meta.env.BASE_URL}textures/city_lights_1024.png`,
+  ])
+  for (const t of [land, city]) {
+    t.minFilter = LinearFilter
+    t.generateMipmaps = false
+  }
 
   const group = useRef<Group>(null)
   const p = palette()
@@ -31,6 +36,8 @@ export function Earth({ children }: { children?: ReactNode }) {
         fragmentShader: earthFrag,
         uniforms: {
           landMap: { value: land },
+          cityMap: { value: city },
+          uCity: { value: p['city-lights'] },
           sunDir: { value: SUN },
           uOcean: { value: p['globe-ocean'] },
           uLand: { value: p['globe-land'] },
@@ -41,9 +48,11 @@ export function Earth({ children }: { children?: ReactNode }) {
           uSaaColor: { value: p.saa },
           uTime: { value: 0 },
           uStep: { value: DOT_STEP },
+          uLod: { value: 0 },
+          uDim: { value: 1 },
         },
       }),
-    [land, p],
+    [land, city, p],
   )
 
   const atmosMat = useMemo(
@@ -66,6 +75,11 @@ export function Earth({ children }: { children?: ReactNode }) {
     const u = earthMat.uniforms
     u.uSaa.value += (target - u.uSaa.value) * Math.min(1, dt * 4)
     u.uTime.value = state.clock.elapsedTime
+    // Height above the surface → finer, dimmer dots (up to 3 halvings: 1.1° → 0.14°).
+    const h = Math.max(0.02, state.camera.position.length() - 1)
+    const lod = Math.min(3, Math.max(0, Math.log2(4.5 / h) * 0.8))
+    u.uLod.value += (lod - u.uLod.value) * Math.min(1, dt * 5)
+    u.uDim.value = 1 - 0.6 * (u.uLod.value / 3)
   })
 
   return (

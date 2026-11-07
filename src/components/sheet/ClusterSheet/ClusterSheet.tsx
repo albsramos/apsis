@@ -62,7 +62,11 @@ export function ClusterSheet({ cluster }: { cluster: ClusterConfig }) {
           <span>{cluster.orbit.label}</span>
           <span className={styles.sun}>
             <Icon name={s.eclipse ? 'moon' : 'sun'} size={12} />
-            {s.eclipse ? 'In shadow' : 'Sunlit'}
+            {/* Both labels share one grid cell so the row never changes width */}
+            <span className={styles.swap}>
+              <span aria-hidden={s.eclipse} className={s.eclipse ? styles.off : undefined}>Sunlit</span>
+              <span aria-hidden={!s.eclipse} className={s.eclipse ? undefined : styles.off}>In shadow</span>
+            </span>
           </span>
         </div>
       </header>

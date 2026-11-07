@@ -9,7 +9,6 @@ import { MOBILE, useMediaQuery } from '@/lib/useMediaQuery'
 import { Earth } from '../Earth'
 import { OrbitRing } from '../OrbitRing'
 import { ClusterMarker } from '../ClusterMarker'
-import { SunGlow } from '../SunGlow'
 import { Starfield } from '../Starfield'
 import { GroundTrack } from '../GroundTrack'
 import { ClusterModel } from '../ClusterModel'
@@ -33,7 +32,6 @@ export function Scene() {
         <CameraRig />
         <Lights />
         <Starfield />
-        <SunGlow />
         <Suspense fallback={null}>
           <Earth>
             <GroundTrack />
