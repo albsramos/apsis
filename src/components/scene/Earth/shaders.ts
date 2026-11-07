@@ -36,9 +36,8 @@ varying vec2 vUv;
 varying vec3 vNormalW;
 varying vec3 vPosW;
 
-// Dot grid at one spacing: 1 inside a land dot, 0 elsewhere. r is the distance to the cell's centre, city
-// the night-lights brightness at that dot.
-float dots(float lat, float lon, float sp, out float r, out float city) {
+// Dot grid at one spacing: 1 inside a land dot, 0 elsewhere. r is the distance to the cell's centre.
+float dots(float lat, float lon, float sp, out float r) {
   float row = floor((lat + 90.0) / sp);
   float latc = -90.0 + (row + 0.5) * sp;
   float cols = max(1.0, floor(360.0 * cos(radians(latc)) / sp));
@@ -46,7 +45,6 @@ float dots(float lat, float lon, float sp, out float r, out float city) {
   float lonc = -180.0 + (col + 0.5) / cols * 360.0;
   vec2 cuv = vec2((lonc + 180.0) / 360.0, (latc + 90.0) / 180.0);
   float land = texture2D(landMap, cuv).r;
-  city = texture2D(cityMap, cuv).r;
   vec2 q = vec2((lon - lonc) * cos(radians(lat)), lat - latc);
   r = length(q);
   float aa = fwidth(r) * 1.2;
@@ -66,19 +64,27 @@ void main() {
   // so the globe stays texture, not a distraction, behind a focused cluster.
   float k = floor(uLod);
   float s0 = uStep / exp2(k);
-  float r, r1, c0, c1;
-  float m0 = dots(lat, lon, s0, r, c0);
-  float m1 = dots(lat, lon, s0 * 0.5, r1, c1);
+  float r, r1;
+  float m0 = dots(lat, lon, s0, r);
+  float m1 = dots(lat, lon, s0 * 0.5, r1);
   float f = fract(uLod);
   float dotMask = mix(m0, m1, f);
-  float city = smoothstep(0.02, 0.35, mix(c0 * m0, c1 * m1, f));
+
   float aa = fwidth(r) * 1.2;
 
-  // Day and night: the night side drops nearly to black, and its cities light up dot by dot.
-  vec3 col3 = uOcean * (0.18 + 0.82 * day);
+  // Day and night: the night side drops nearly to black, with the land dots only a faint outline.
+  vec3 col3 = uOcean * (0.15 + 0.85 * day);
   vec3 dayDot = uLand * (0.3 + 0.7 * day) * uDim;
-  vec3 nightDot = uLand * 0.07 * uDim + uCity * city * 2.2 * (0.55 + 0.45 * uDim);
+  vec3 nightDot = uLand * 0.045 * uDim;
   col3 = mix(col3, mix(nightDot, dayDot, day), dotMask);
+
+  // City lights, drawn from the real night-lights map at full resolution (not on the dot grid): sharp,
+  // warm cores in the densest cities fading to dim sprawl, plus a soft halo (the map's blurred channel).
+  vec2 lights = texture2D(cityMap, vUv).rg;
+  float night = 1.0 - smoothstep(0.0, 0.3, day);
+  float core = pow(lights.r, 1.7) * 2.6;
+  float halo = pow(lights.g, 1.4) * 0.28;
+  col3 += uCity * (core + halo) * night;
 
   // Limb: a thin blue rim, like a lit atmosphere edge
   float fres = pow(1.0 - max(dot(n, v), 0.0), 5.0);

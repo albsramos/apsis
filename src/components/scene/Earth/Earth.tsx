@@ -19,12 +19,11 @@ const DOT_STEP = 1.1
 export function Earth({ children }: { children?: ReactNode }) {
   const [land, city] = useTexture([
     `${import.meta.env.BASE_URL}textures/land_mask_1024.png`,
-    `${import.meta.env.BASE_URL}textures/city_lights_1024.png`,
+    `${import.meta.env.BASE_URL}textures/city_lights_2048.png`,
   ])
-  for (const t of [land, city]) {
-    t.minFilter = LinearFilter
-    t.generateMipmaps = false
-  }
+  land.minFilter = LinearFilter
+  land.generateMipmaps = false
+  city.anisotropy = 8
 
   const group = useRef<Group>(null)
   const p = palette()

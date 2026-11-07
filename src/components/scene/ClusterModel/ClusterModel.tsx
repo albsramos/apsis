@@ -1,7 +1,7 @@
 import { Html } from '@react-three/drei'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
-import { AdditiveBlending, Color, Group, MeshStandardMaterial, ShaderMaterial } from 'three'
+import { AdditiveBlending, Color, DoubleSide, Group, MeshStandardMaterial, ShaderMaterial } from 'three'
 import { clusterById, SIM } from '@/sim/fleet'
 import { sunAngleDeg } from '@/sim/orbit'
 import type { ClusterSample, Lens, PartRef, Severity } from '@/sim/types'
@@ -122,7 +122,12 @@ export function ClusterModel({ id }: { id: string }) {
       branch: flow(p['viz-active'], p['heat-2'], 1),
       boom: flow(p['heat-2'], p['viz-active'], 8),
       segPipes: Array.from({ length: 8 }, () => flow(p['heat-2'], p['viz-active'], 2)),
+      // Output: data from each module into the line along the truss, out of the dish as a downlink beam;
+      // power from the wing tips inwards.
       data: flow(p['viz-active'], p.fg, 10),
+      dataBranch: flow(p['viz-active'], p['viz-active'], 1),
+      downlink: Object.assign(flow(p['viz-active'], new Color(0, 0, 0), 4), { side: DoubleSide }),
+      power: [0, 1].map(() => flow(p.fg, p['heat-2'], 6)),
     }
   }, [p])
 
@@ -179,28 +184,33 @@ export function ClusterModel({ id }: { id: string }) {
       if (sev) addScaled(tmp.e, severityColor(sev), wF * (sev === 'info' ? 0.45 : pulse) * 0.9)
       if (samePart(pm.part, hover) || samePart(pm.part, picked)) tmp.e.addScalar(samePart(pm.part, picked) ? 0.22 : 0.14)
       pm.mat.emissive.lerp(tmp.e, k)
-      tmp.c.copy(pm.base).lerp(dark, Math.min(1, wF * (sev ? 0.4 : 0.85) + wT * 0.9))
+      tmp.c.copy(pm.base).lerp(dark, Math.min(1, wF * (sev ? 0.4 : 0.85) + (wT + wO) * 0.9))
       pm.mat.color.lerp(tmp.c, k)
-      // Thermal and Faults draw the structure as lines; heat (or the fault) makes the lines glow.
-      pm.mat.wireframe = (wF > 0.5 && !sev) || wT > 0.5
+      // Every lens draws the structure as lines that glow with what the lens is about (heat, work, faults);
+      // only a faulted part in the Faults lens is drawn solid, so it stands out.
+      pm.mat.wireframe = !(wF > 0.5 && sev)
     }
 
     mats.modules.forEach((pm, i) => {
       const heat = heatColor(s.modulesC[i], MODULE_SCALE, new Color()).multiplyScalar(0.75)
-      const out = p['viz-active'].clone().multiplyScalar(0.05 + 0.8 * s.util * cluster.moduleShares[i] * 6 * s.throttle)
+      const out = p['viz-active'].clone().multiplyScalar(0.12 + 1.1 * s.util * cluster.moduleShares[i] * 6 * s.throttle)
       apply(pm, heat, out)
     })
     mats.segments.forEach((pm, k2) => {
       const heat = heatColor(s.segmentsC[k2], RADIATOR_SCALE, new Color()).multiplyScalar(s.segmentAlive[k2] ? 0.55 : 0.7)
-      apply(pm, heat, null)
+      apply(pm, heat, p['fg-subtle'].clone().multiplyScalar(0.22))
     })
     mats.wings.forEach((pm, w) => {
       const gen = Math.max(0, Math.cos(rad(s.wingErrDeg[w]))) * (s.eclipse ? 0 : 1)
-      apply(pm, p['fg-subtle'].clone().multiplyScalar(0.35), p['viz-active'].clone().multiplyScalar(0.3 * gen))
+      apply(pm, p['fg-subtle'].clone().multiplyScalar(0.35), p['fg-subtle'].clone().multiplyScalar(0.18).add(p['heat-2'].clone().multiplyScalar(0.75 * gen)))
+      const pu = mats.power[w].uniforms
+      pu.uTime.value = time
+      pu.uSpeed.value = 0.5 + 0.7 * gen
+      pu.uIntensity.value = wO * gen
     })
-    apply(mats.dish, p['fg-subtle'].clone().multiplyScalar(0.35), p['viz-active'].clone().multiplyScalar(0.25 + 0.5 * pulse * s.util))
-    mats.truss.color.lerp(tmp.c.set('#a1a1aa').lerp(dark, Math.min(1, wF * 0.85 + wT * 0.75)), k)
-    mats.truss.wireframe = wF > 0.5 || wT > 0.5
+    apply(mats.dish, p['fg-subtle'].clone().multiplyScalar(0.35), p['viz-active'].clone().multiplyScalar(0.5 + 0.8 * s.util))
+    mats.truss.color.lerp(tmp.c.set('#a1a1aa').lerp(dark, Math.min(1, wF * 0.85 + (wT + wO) * 0.75)), k)
+    mats.truss.wireframe = true
 
     const pumpFault = faults.get('loop')
     // Coolant glows in Thermal; in Faults it glows only if the pump is the fault, in that fault's colour.
@@ -223,6 +233,11 @@ export function ClusterModel({ id }: { id: string }) {
     du.uTime.value = time
     du.uSpeed.value = 0.4 + 1.4 * s.util
     du.uIntensity.value = wO
+    for (const m of [mats.dataBranch, mats.downlink]) {
+      m.uniforms.uTime.value = time
+      m.uniforms.uSpeed.value = 0.4 + 1.4 * s.util
+      m.uniforms.uIntensity.value = wO * (m === mats.downlink ? 0.2 + 0.4 * s.util : 1)
+    }
   })
 
   const handlers = (part: PartRef) => ({
@@ -260,9 +275,18 @@ export function ClusterModel({ id }: { id: string }) {
           </mesh>
         )
       })}
-      <mesh material={mats.data} position={[0.25, 0, -0.065]} rotation={[0, 0, Math.PI / 2]}>
+      {/* Data line: from the modules (branches) along the truss to the dish */}
+      <mesh material={mats.data} position={[0.25, 0, -0.065]} rotation={[0, 0, -Math.PI / 2]} raycast={() => null}>
         <cylinderGeometry args={[0.016, 0.016, 1.9, 10, 1, true]} />
       </mesh>
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const [x, y] = modulePos(i)
+        return (
+          <mesh key={`d${i}`} material={mats.dataBranch} position={[x, y / 2, -0.065]} rotation={[y > 0 ? Math.PI : 0, 0, 0]} raycast={() => null}>
+            <cylinderGeometry args={[0.01, 0.01, Math.abs(y), 8, 1, true]} />
+          </mesh>
+        )
+      })}
 
       {/* Compute modules */}
       {mats.modules.map((pm, i) => (
@@ -275,6 +299,12 @@ export function ClusterModel({ id }: { id: string }) {
       <mesh material={mats.truss} position={[WING_X, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.018, 0.018, 2 * (WING.offset + WING.length), 8]} />
       </mesh>
+      {/* Power from each wing tip in to the truss */}
+      {[0, 1].map((w) => (
+        <mesh key={`p${w}`} material={mats.power[w]} position={[WING_X, 0, (w === 0 ? 1 : -1) * (WING.offset + WING.length) / 2]} rotation={[w === 0 ? -Math.PI / 2 : Math.PI / 2, 0, 0]} raycast={() => null}>
+          <cylinderGeometry args={[0.013, 0.013, WING.offset + WING.length, 8, 1, true]} />
+        </mesh>
+      ))}
       {mats.wings.map((pm, w) => (
         <group key={w} position={[WING_X, 0, 0]} ref={(el) => void (wings.current[w] = el)}>
           <mesh material={pm.mat} position={[0, 0, wingZ(w)]} {...handlers(pm.part)}>
@@ -314,7 +344,11 @@ export function ClusterModel({ id }: { id: string }) {
           <cylinderGeometry args={[0.012, 0.012, 0.12, 6]} />
         </mesh>
         <mesh material={mats.dish.mat} position={[0, -0.15, 0]} rotation={[Math.PI, 0, 0]}>
-          <sphereGeometry args={[0.13, 24, 8, 0, Math.PI * 2, 0, 0.9]} />
+          <sphereGeometry args={[0.13, 16, 5, 0, Math.PI * 2, 0, 0.9]} />
+        </mesh>
+        {/* Downlink beam towards the ground (Output lens) */}
+        <mesh material={mats.downlink} position={[0, -0.2 - 0.6, 0]} rotation={[Math.PI, 0, 0]} raycast={() => null}>
+          <cylinderGeometry args={[0.32, 0.03, 1.2, 24, 1, true]} />
         </mesh>
       </group>
 
