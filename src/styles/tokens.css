@@ -75,8 +75,7 @@
   }
 }
 
-:root,
-:root[data-theme='dark'] {
+:root {
   color-scheme: dark;
   --bg: #09090b;
   --bg-subtle: #0f0f12;
@@ -116,7 +115,9 @@
   --syn-type: #67e8f9;
 }
 
-:root[data-theme='light'] {
+/* Light theme: kept from Whetstone but not designed for Apsis yet, so it is opt-in under its own attribute
+   (a host's data-theme must not flip a dark-only app). */
+:root[data-apsis-theme='light'] {
   color-scheme: light;
   --bg: #ffffff;
   --bg-subtle: #fafafa;

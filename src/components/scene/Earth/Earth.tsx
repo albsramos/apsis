@@ -17,7 +17,7 @@ const DOT_STEP = 1.1
  * rotating frame (ground tracks, ground stations).
  */
 export function Earth({ children }: { children?: ReactNode }) {
-  const land = useTexture('/textures/land_mask_1024.png')
+  const land = useTexture(`${import.meta.env.BASE_URL}textures/land_mask_1024.png`)
   land.minFilter = LinearFilter
   land.generateMipmaps = false
 

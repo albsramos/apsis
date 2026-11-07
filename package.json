@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "sim:check": "esbuild scripts/sim-check.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/sim-check.mjs --log-level=warning && node node_modules/.cache/sim-check.mjs -v"
+    "sim:check": "esbuild scripts/sim-check.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/sim-check.mjs --log-level=warning && node node_modules/.cache/sim-check.mjs -v",
+    "build:artifact": "tsc -b && vite build --mode artifact --base ./ --outDir dist-artifact && node scripts/artifact.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
