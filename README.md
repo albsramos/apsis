@@ -49,6 +49,10 @@ Every push to `main` builds `dist-pages/` and publishes it to the `gh-pages` bra
 (`.github/workflows/pages.yml`), which GitHub Pages serves at https://albsramos.github.io/apsis/. Links to a cluster
 look like `…/apsis/#ko-5`.
 
+The Pages build is an installable PWA: open it in Chrome, Edge or Safari and choose *Install* (or *Add to Home Screen*).
+A service worker generated at build time (`scripts/pwa.ts`) precaches every file, so it runs offline after the first
+visit, and each deploy replaces the old cache. The manifest and icons live in `public/`.
+
 Built with React 19, TypeScript, Vite, CSS Modules, three.js (@react-three/fiber, drei, postprocessing), zustand,
 Radix and cmdk. The UI uses Whetstone's design tokens. The globe is drawn as dots from a small land mask
 (`public/textures/land_mask_1024.png`, derived from the three.js example Earth maps); altitudes are drawn ×3 so the

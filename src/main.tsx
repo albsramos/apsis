@@ -10,3 +10,8 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// The GitHub Pages build is an installable PWA; its service worker comes from scripts/pwa.ts.
+if (import.meta.env.MODE === 'pages' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}))
+}
