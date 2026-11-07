@@ -1,0 +1,21 @@
+.root {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+.viewport {
+  width: 100%;
+  height: 100%;
+}
+.bar {
+  display: flex;
+  width: 8px;
+  padding: 2px;
+  touch-action: none;
+  user-select: none;
+}
+.thumb {
+  flex: 1;
+  border-radius: 999px;
+  background: var(--border-strong);
+}

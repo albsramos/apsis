@@ -1,0 +1,155 @@
+/*
+ * Design tokens. Everything visual reads from here, the 3D scene included (src/lib/palette.ts reads them at startup).
+ * Copied from Whetstone: neutral zinc scale (shadcn-like), one accent, one radius scale.
+ * Components use these vars only — never raw hex.
+ */
+:root {
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  /* Code in the editor, and text in form controls. Bumped to 16px on touch screens below:
+     iOS zooms the page when you focus anything smaller. */
+  --text-code: 13px;
+  --text-control: var(--text-xs);
+
+  /* Control heights. Touch screens get ~44px targets. */
+  --control-sm: 30px;
+  --control-md: 36px;
+  --control-icon: 32px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --sheet-width: 380px;
+  --topbar-height: 56px;
+  --drawer-peek: 196px;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration: 160ms;
+  --duration-slow: 420ms;
+
+  /*
+   * Colour carries meaning, and only these meanings:
+   *   red (--danger) danger · yellow (--viz-warn) warning · green (--viz-done) all good · blue (--viz-active) neutral data.
+   * Everything else is the zinc scale (white text).
+   *
+   * Heat ramp: neutral blue through its normal range, turning yellow only past the warning threshold and red at
+   * the limit (see lib/heat.ts for where each stop sits). Same in both themes: the scene is always space.
+   */
+  --heat-0: #172554;
+  --heat-1: #3b82f6;
+  --heat-2: #c7dbff;
+  --heat-3: #fbbf24;
+  --heat-4: #f87171;
+
+  /* The scene's own colours */
+  --space: #040406;
+  --atmosphere: #4f8cff;
+  --globe-ocean: #0a0d16;
+  --globe-land: #9fb4dc;
+  --saa: #93c5fd;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --text-code: 16px;
+    --text-control: 16px;
+    --control-sm: 40px;
+    --control-md: 44px;
+    --control-icon: 44px;
+  }
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #09090b;
+  --bg-subtle: #0f0f12;
+  --surface: #18181b;
+  --surface-hover: #1f1f23;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --fg: #fafafa;
+  --fg-muted: #a1a1aa;
+  --fg-subtle: #71717a;
+  --accent: #fafafa;
+  --accent-fg: #18181b;
+  --ring: #52525b;
+  --overlay: rgb(0 0 0 / 0.6);
+  --selection: rgb(96 165 250 / 0.35);
+  --line-highlight: rgb(255 255 255 / 0.04);
+  --glass: rgb(9 9 11 / 0.72);
+  --glass-border: rgb(255 255 255 / 0.08);
+  --glass-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+
+  /* Semantic colours for visualisations and states */
+  --viz-active: #60a5fa;
+  --viz-active-soft: rgb(96 165 250 / 0.16);
+  --viz-done: #4ade80;
+  --viz-done-soft: rgb(74 222 128 / 0.14);
+  --viz-warn: #fbbf24;
+  --viz-warn-soft: rgb(251 191 36 / 0.16);
+  --danger: #f87171;
+  --success: #4ade80;
+
+  /* Syntax */
+  --syn-keyword: #c084fc;
+  --syn-string: #86efac;
+  --syn-number: #fdba74;
+  --syn-comment: #71717a;
+  --syn-fn: #93c5fd;
+  --syn-type: #67e8f9;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --surface: #f4f4f5;
+  --surface-hover: #e4e4e7;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --fg: #09090b;
+  --fg-muted: #52525b;
+  --fg-subtle: #a1a1aa;
+  --accent: #18181b;
+  --accent-fg: #fafafa;
+  --ring: #a1a1aa;
+  --overlay: rgb(9 9 11 / 0.4);
+  --selection: rgb(37 99 235 / 0.22);
+  --line-highlight: rgb(9 9 11 / 0.035);
+  --glass: rgb(255 255 255 / 0.8);
+  --glass-border: rgb(9 9 11 / 0.08);
+  --glass-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+
+  --viz-active: #2563eb;
+  --viz-active-soft: rgb(37 99 235 / 0.1);
+  --viz-done: #16a34a;
+  --viz-done-soft: rgb(22 163 74 / 0.1);
+  --viz-warn: #d97706;
+  --viz-warn-soft: rgb(217 119 6 / 0.12);
+  --danger: #dc2626;
+  --success: #16a34a;
+
+  --syn-keyword: #7c3aed;
+  --syn-string: #15803d;
+  --syn-number: #c2410c;
+  --syn-comment: #a1a1aa;
+  --syn-fn: #1d4ed8;
+  --syn-type: #0e7490;
+}

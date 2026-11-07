@@ -1,0 +1,38 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+.success {
+  color: var(--viz-done);
+  background: var(--viz-done-soft);
+  border-color: transparent;
+}
+.warn {
+  color: var(--viz-warn);
+  background: var(--viz-warn-soft);
+  border-color: transparent;
+}
+.info {
+  color: var(--viz-active);
+  background: var(--viz-active-soft);
+  border-color: transparent;
+}
+.danger {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  border-color: transparent;
+}
+.solid {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: transparent;
+}

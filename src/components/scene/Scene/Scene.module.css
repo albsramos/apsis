@@ -1,0 +1,8 @@
+.scene {
+  position: absolute;
+  inset: 0;
+  background: var(--space);
+}
+.scene canvas {
+  touch-action: none;
+}

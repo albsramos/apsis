@@ -1,0 +1,25 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: var(--text-xs);
+}
+.row:last-child {
+  border-bottom: 0;
+}
+.row dt {
+  color: var(--fg-muted);
+}
+.row dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
