@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
+import { pwa } from './scripts/pwa'
 
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), mode === 'pages' && pwa()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
@@ -14,4 +15,4 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1600,
   },
-})
+}))

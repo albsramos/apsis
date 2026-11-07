@@ -9,11 +9,14 @@ const routes = [
 
 /**
  * The normal build routes on real paths (/cluster/ko-5). The artifact build (`npm run build:artifact`) is served
- * where only a plain `#name` survives in a link, so it keeps routes in memory and mirrors the selection to
- * `#ko-5`, reading it back on load.
+ * where only a plain `#name` survives in a link, and the GitHub Pages build (`npm run build:pages`) is a static host
+ * with no server-side fallback, so both keep routes in memory and mirror the selection to `#ko-5`, reading it back
+ * on load.
  */
+const hashRoutes = import.meta.env.MODE === 'artifact' || import.meta.env.MODE === 'pages'
+
 function makeRouter() {
-  if (import.meta.env.MODE !== 'artifact') return createBrowserRouter(routes)
+  if (!hashRoutes) return createBrowserRouter(routes)
   const fromHash = () => {
     const id = window.location.hash.slice(1)
     return /^ko-\d+$/.test(id) ? `/cluster/${id}` : '/'

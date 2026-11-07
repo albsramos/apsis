@@ -2,6 +2,10 @@
 
 Mission control for **Kestrel Orbital**, a (fictional) company that runs data centers in orbit.
 
+**[Open the live app →](https://albsramos.github.io/apsis/)**
+
+![Apsis overview: the dotted globe with the seven clusters circling it at ×600, the fleet sheet on the left](docs/overview.gif)
+
 Seven compute clusters circle the Earth. Apsis answers the four questions a maintainer has about each one, at a glance:
 
 | Question | Where you see it |
@@ -38,7 +42,16 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
 npm run sim:check  # assert the simulation's stories hold
+npm run build:pages  # the GitHub Pages build (hash routes, relative paths) in dist-pages/
 ```
+
+Every push to `main` builds `dist-pages/` and publishes it to the `gh-pages` branch
+(`.github/workflows/pages.yml`), which GitHub Pages serves at https://albsramos.github.io/apsis/. Links to a cluster
+look like `…/apsis/#ko-5`.
+
+The Pages build is an installable PWA: open it in Chrome, Edge or Safari and choose *Install* (or *Add to Home Screen*).
+A service worker generated at build time (`scripts/pwa.ts`) precaches every file, so it runs offline after the first
+visit, and each deploy replaces the old cache. The manifest and icons live in `public/`.
 
 Built with React 19, TypeScript, Vite, CSS Modules, three.js (@react-three/fiber, drei, postprocessing), zustand,
 Radix and cmdk. The UI uses Whetstone's design tokens. The globe is drawn as dots from a small land mask
