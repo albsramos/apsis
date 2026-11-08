@@ -8,18 +8,34 @@
   user-select: none;
   cursor: pointer;
 }
+/* Not clipped, so the range's glow can spill past the bar's edges */
 .track {
   position: relative;
   flex: 1;
-  height: 6px;
-  overflow: hidden;
+  height: 4px;
   border-radius: 999px;
   background: var(--surface-hover);
 }
 .range {
   position: absolute;
   height: 100%;
+  border-radius: inherit;
   background: color-mix(in srgb, var(--viz-active) 55%, transparent);
+}
+/* The glow: a blurred ramp that is strongest at the ball and fades out behind it */
+.range::after {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  bottom: -3px;
+  width: min(100%, 160px);
+  border-radius: inherit;
+  background: linear-gradient(to right, transparent, var(--viz-active));
+  filter: blur(5px);
+  opacity: 0;
+  content: '';
+  transition: opacity var(--duration) var(--ease);
+  pointer-events: none;
 }
 .thumb {
   display: block;
@@ -37,4 +53,16 @@
 .thumb:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+/* While dragging, the bar itself brightens towards the ball and glows */
+.root[data-dragging] .range {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--viz-active) 45%, transparent),
+    color-mix(in srgb, var(--viz-active) 70%, transparent) 60%,
+    var(--viz-active)
+  );
+}
+.root[data-dragging] .range::after {
+  opacity: 0.9;
 }
