@@ -29,7 +29,7 @@ export function Timeline() {
     <div className={styles.bar}>
       <Tooltip content={<>{playing ? 'Pause' : 'Play'} <Kbd>Space</Kbd></>} side="top">
         <button type="button" className={styles.play} onClick={actions.togglePlay} aria-label={playing ? 'Pause' : 'Play'}>
-          <Icon name={playing ? 'pause' : 'play'} size={14} />
+          <Icon name={playing ? 'pause' : 'play'} size={12} />
         </button>
       </Tooltip>
 

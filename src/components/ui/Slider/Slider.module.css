@@ -11,30 +11,46 @@
 .track {
   position: relative;
   flex: 1;
-  height: 6px;
+  height: 4px;
   overflow: hidden;
   border-radius: 999px;
   background: var(--surface-hover);
+  transition: box-shadow var(--duration) var(--ease);
 }
 .range {
   position: absolute;
   height: 100%;
   background: color-mix(in srgb, var(--viz-active) 55%, transparent);
+  transition: background var(--duration) var(--ease);
 }
+/* A slim playhead rather than a knob */
 .thumb {
   display: block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--viz-active);
+  width: 4px;
+  height: 16px;
   border-radius: 999px;
-  background: var(--bg);
-  box-shadow: 0 0 0 4px var(--viz-active-soft);
-  transition: transform var(--duration) var(--ease);
+  background: var(--viz-active);
+  transition:
+    transform var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
 }
 .thumb:hover {
-  transform: scale(1.15);
+  transform: scaleY(1.15);
 }
 .thumb:focus-visible {
   outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline-offset: 3px;
+}
+.root[data-dragging] .thumb {
+  transform: scaleY(1.2);
+  box-shadow:
+    0 0 8px var(--viz-active),
+    0 0 18px var(--viz-active-soft);
+}
+.root[data-dragging] .range {
+  background: var(--viz-active);
+}
+/* The track clips its range, so the bar's glow sits on the track itself */
+.root[data-dragging] .track {
+  box-shadow: 0 0 10px var(--viz-active-soft);
 }

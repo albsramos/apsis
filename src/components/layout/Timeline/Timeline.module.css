@@ -10,14 +10,15 @@
   box-shadow: var(--glass-shadow);
 }
 .play {
+  position: relative;
   display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  width: var(--control-icon);
-  height: var(--control-icon);
+  width: 30px;
+  height: 30px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   background: var(--accent);
   color: var(--accent-fg);
   cursor: pointer;
@@ -25,6 +26,12 @@
 }
 .play:hover {
   opacity: 0.88;
+}
+/* Keeps a comfortable touch target while the button itself stays small */
+.play::before {
+  position: absolute;
+  inset: -6px;
+  content: '';
 }
 .readout {
   display: flex;
@@ -109,6 +116,10 @@
   .readout,
   .ticks {
     display: none;
+  }
+  .play {
+    width: 28px;
+    height: 28px;
   }
   .live {
     padding: 0 var(--space-2);
