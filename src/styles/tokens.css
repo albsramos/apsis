@@ -38,7 +38,8 @@
   --sheet-width: 380px;
   /* Below the status bar when installed as a PWA (viewport-fit=cover draws under it). */
   --safe-top: env(safe-area-inset-top, 0px);
-  --topbar-height: calc(56px + var(--safe-top));
+  --topbar-inset: var(--safe-top);
+  --topbar-height: calc(56px + var(--topbar-inset));
   --drawer-peek: 196px;
 
   --ease: cubic-bezier(0.2, 0, 0, 1);
@@ -157,4 +158,11 @@
   --syn-comment: #a1a1aa;
   --syn-fn: #1d4ed8;
   --syn-type: #0e7490;
+}
+
+/* Installed PWA: leave breathing room between the status bar and the top bar. */
+@media (display-mode: standalone) {
+  :root {
+    --topbar-inset: calc(var(--safe-top) + var(--space-3));
+  }
 }

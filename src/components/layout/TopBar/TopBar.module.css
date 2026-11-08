@@ -7,7 +7,7 @@
   align-items: center;
   gap: var(--space-3);
   height: var(--topbar-height);
-  padding: var(--safe-top) var(--space-4) 0;
+  padding: var(--topbar-inset) var(--space-4) 0;
   background: linear-gradient(to bottom, rgb(5 5 7 / 0.85), rgb(5 5 7 / 0));
   pointer-events: none;
 }
@@ -137,21 +137,14 @@
     display: none;
   }
   .bar {
-    grid-template-columns: auto 1fr auto;
+    display: flex;
+    justify-content: space-between;
     gap: var(--space-2);
-    padding: var(--safe-top) var(--space-3) 0;
+    padding: var(--topbar-inset) var(--space-3) 0;
   }
-  .lenses {
-    justify-self: center;
-  }
+  .brand,
   .lensLabel,
-  .clock,
-  .name {
-    display: none;
-  }
-}
-@media (max-width: 380px) {
-  .logo {
+  .clock {
     display: none;
   }
 }
