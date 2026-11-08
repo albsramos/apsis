@@ -24,7 +24,7 @@ const shares = (...w: number[]) => {
 }
 
 /**
- * Kestrel Orbital's fleet. Fictional, but the orbits are chosen like a real operator would: two dawn-dusk
+ * The fleet. Fictional, but the orbits are chosen like a real operator would: two dawn-dusk
  * sun-synchronous clusters that never see eclipse (the thermally calm control group), three at 53° that cycle
  * through shadow every orbit, one polar, and one higher, colder storage cluster.
  */

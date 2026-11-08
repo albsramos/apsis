@@ -1,6 +1,6 @@
 # Apsis
 
-Mission control for **Kestrel Orbital**, a (fictional) company that runs data centers in orbit.
+Envisioning what a management tool for data centers in space would look like.
 
 **[Open the live app →](https://albsramos.github.io/apsis/)**
 

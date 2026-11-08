@@ -1,6 +1,6 @@
 # Apsis: rules for working in this repo
 
-Apsis is mission control for Kestrel Orbital (fictional), which runs data centers in orbit. One 3D scene on the
+Apsis is mission control for a (fictional) fleet of data centers in orbit. One 3D scene on the
 right, one information sheet on the left, one selection at a time. These rules apply to every change, whoever
 makes it. They follow Whetstone's conventions, plus a few for the 3D scene.
 
