@@ -29,7 +29,7 @@ The simulation is deterministic and physics-driven, so what you see has a cause:
 - **KO-1 / KO-2** fly dawn-dusk sun-synchronous orbits and never see eclipse: the calm control group.
 - **KO-3, KO-4, KO-5** at 53° cross Earth's shadow every orbit. The loop cools in each eclipse and heaters hold it.
 - **KO-7 Deepwell**, lightly loaded cold storage, runs on heaters in shadow.
-- Everyone collects radiation upsets over the **South Atlantic Anomaly** (shown on the globe in the Faults lens).
+- Everyone collects radiation upsets over the **South Atlantic Anomaly** (the blue stretches on the timeline).
 
 ## Keys
 

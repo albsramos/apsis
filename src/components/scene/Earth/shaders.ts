@@ -24,11 +24,6 @@ uniform vec3 sunDir;
 uniform vec3 uOcean;
 uniform vec3 uLand;
 uniform vec3 uAtmos;
-uniform float uSaa;
-uniform vec2 uSaaCenter;
-uniform vec2 uSaaRadius;
-uniform vec3 uSaaColor;
-uniform float uTime;
 uniform float uStep;
 uniform float uLod;
 uniform float uDim;
@@ -91,16 +86,6 @@ void main() {
   col3 += uAtmos * fres * (0.015 + 0.17 * day);
 
   // South Atlantic Anomaly (Faults lens): a soft outlined zone, dots inside tinted
-  if (uSaa > 0.001) {
-    vec2 s = vec2((lon - uSaaCenter.x) * cos(radians(lat)) / uSaaRadius.x, (lat - uSaaCenter.y) / uSaaRadius.y);
-    float sr = length(s);
-    float inside = 1.0 - smoothstep(0.74, 0.8, sr);
-    float ring = 1.0 - smoothstep(0.0, 0.03, abs(sr - 0.8));
-    // the zone gets its own dot grid, over ocean and land alike
-    float zoneDots = 1.0 - smoothstep(s0 * 0.22 - aa, s0 * 0.22 + aa, r);
-    float pulse = 0.75 + 0.25 * sin(uTime * 1.6);
-    col3 = mix(col3, uSaaColor, (inside * zoneDots * 0.55 * pulse + ring * 0.7) * uSaa);
-  }
 
   gl_FragColor = vec4(col3, 1.0);
   #include <tonemapping_fragment>

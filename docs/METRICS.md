@@ -40,7 +40,7 @@ A legend in the top-right corner of the scene says what the colours mean.
 |---|---|---|---|
 | **Output** | Brightness = utilisation | Modules glow with their load, wings with power generated, beam = data downlink | Output (PF), bar = utilisation |
 | **Thermal** | Heat colour of the hottest module | Each module and radiator segment in its own heat colour; coolant flows along the pipes | Hottest module °C, bar from 10°C to the 45°C limit |
-| **Faults** | Red critical, yellow degraded, grey nominal | Faulted parts drawn solid and pulsing; the SAA is the pale patch on the globe | The worst fault |
+| **Faults** | Red critical, yellow degraded, grey nominal | Faulted parts drawn solid and pulsing | The worst fault |
 
 **Heat colours.** Compute modules: dark blue 8°C → blue 24°C → pale 38°C → yellow 39.5°C → red 42.5°C. Radiators use
 their own scale, −60°C → 80°C, because "normal" is very different for them.

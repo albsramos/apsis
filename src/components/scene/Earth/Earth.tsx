@@ -2,8 +2,8 @@ import { useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef, type ReactNode } from 'react'
 import { AdditiveBlending, BackSide, Group, LinearFilter, ShaderMaterial, Vector3 } from 'three'
-import { earthRotation, SAA } from '@/sim/orbit'
-import { clock, useApsis } from '@/store'
+import { earthRotation } from '@/sim/orbit'
+import { clock } from '@/store'
 import { palette } from '@/lib/palette'
 import { atmosphereFrag, atmosphereVert, earthFrag, earthVert } from './shaders'
 
@@ -13,7 +13,7 @@ const DOT_STEP = 1.1
 
 /**
  * The Earth as a dotted globe, with a thin atmosphere rim. It is a backdrop: the orbits and clusters are
- * the subject. In the Faults lens the South Atlantic Anomaly appears on it. `children` sit in the Earth's
+ * the subject. `children` sit in the Earth's
  * rotating frame (ground tracks, ground stations).
  */
 export function Earth({ children }: { children?: ReactNode }) {
@@ -41,11 +41,6 @@ export function Earth({ children }: { children?: ReactNode }) {
           uOcean: { value: p['globe-ocean'] },
           uLand: { value: p['globe-land'] },
           uAtmos: { value: p.atmosphere },
-          uSaa: { value: 0 },
-          uSaaCenter: { value: [SAA.lon, SAA.lat] },
-          uSaaRadius: { value: [SAA.rLon, SAA.rLat] },
-          uSaaColor: { value: p.saa },
-          uTime: { value: 0 },
           uStep: { value: DOT_STEP },
           uLod: { value: 0 },
           uDim: { value: 1 },
@@ -70,10 +65,7 @@ export function Earth({ children }: { children?: ReactNode }) {
 
   useFrame((state, dt) => {
     if (group.current) group.current.rotation.y = earthRotation(clock.view())
-    const target = useApsis.getState().lens === 'faults' ? 1 : 0
     const u = earthMat.uniforms
-    u.uSaa.value += (target - u.uSaa.value) * Math.min(1, dt * 4)
-    u.uTime.value = state.clock.elapsedTime
     // Height above the surface → finer, dimmer dots (up to 3 halvings: 1.1° → 0.14°).
     const h = Math.max(0.02, state.camera.position.length() - 1)
     const lod = Math.min(3, Math.max(0, Math.log2(4.5 / h) * 0.8))

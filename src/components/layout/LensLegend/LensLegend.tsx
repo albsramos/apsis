@@ -66,9 +66,7 @@ export function LensLegend() {
               </li>
             )}
           </ul>
-          <p className={styles.note}>
-            {selected ? 'A faulted part is drawn solid and pulses.' : 'The pale patch on the globe is the South Atlantic Anomaly.'}
-          </p>
+          {selected && <p className={styles.note}>A faulted part is drawn solid and pulses.</p>}
         </>
       )}
     </aside>
