@@ -4,16 +4,19 @@ import { Kbd } from '@/components/ui/Kbd'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import { Section } from '@/components/ui/Section'
 import { STATUS_LABEL, StatusDot } from '@/components/ui/StatusDot'
+import { Term } from '@/components/ui/Term'
 import { Tooltip } from '@/components/ui/Tooltip'
+import type { GlossaryKey } from '@/lib/glossary'
 import { Vitals } from '../Vitals'
-import { ThermalChart } from '../ThermalChart'
+import { ThermalChart, thermalSpan } from '../ThermalChart'
 import { FaultList } from '../FaultList'
 import { ModuleGrid } from '../ModuleGrid'
 import { OrbitCard } from '../OrbitCard'
 import { betaDeg } from '@/sim/orbit'
+import { LIMITS } from '@/sim/faults'
 import type { ClusterConfig } from '@/sim/types'
 import { actions, useApsis, useTelemetry } from '@/store'
-import { fmt } from '@/lib/format'
+import { duration, fmt } from '@/lib/format'
 import { cx } from '@/lib/cx'
 import styles from './ClusterSheet.module.css'
 
@@ -57,17 +60,21 @@ export function ClusterSheet({ cluster }: { cluster: ClusterConfig }) {
           </h2>
         </div>
         <div className={styles.meta}>
-          <Badge tone={TONE[s.status]}>{STATUS_LABEL[s.status]}</Badge>
+          <Term k="clusterStatus">
+            <Badge tone={TONE[s.status]}>{STATUS_LABEL[s.status]}</Badge>
+          </Term>
           <span>{cluster.role}</span>
           <span>{cluster.orbit.label}</span>
-          <span className={styles.sun}>
-            <Icon name={s.eclipse ? 'moon' : 'sun'} size={12} />
-            {/* Both labels share one grid cell so the row never changes width */}
-            <span className={styles.swap}>
-              <span aria-hidden={s.eclipse} className={s.eclipse ? styles.off : undefined}>Sunlit</span>
-              <span aria-hidden={!s.eclipse} className={s.eclipse ? undefined : styles.off}>In shadow</span>
+          <Term k="sunlit">
+            <span className={styles.sun}>
+              <Icon name={s.eclipse ? 'moon' : 'sun'} size={12} />
+              {/* Both labels share one grid cell so the row never changes width */}
+              <span className={styles.swap}>
+                <span aria-hidden={s.eclipse} className={s.eclipse ? styles.off : undefined}>Sunlit</span>
+                <span aria-hidden={!s.eclipse} className={s.eclipse ? undefined : styles.off}>In shadow</span>
+              </span>
             </span>
-          </span>
+          </Term>
         </div>
       </header>
 
@@ -76,27 +83,27 @@ export function ClusterSheet({ cluster }: { cluster: ClusterConfig }) {
           <Vitals cluster={cluster} sample={s} />
         </div>
 
-        <Section title="Faults" aside={<span>{loud ? `${loud} need attention` : `${s.faults.length} notices`}</span>}>
+        <Section title="Faults" info="faults" aside={<span>{loud ? `${loud} need attention` : `${s.faults.length} notices`}</span>}>
           <FaultList sample={s} />
         </Section>
 
-        <Section title="Thermal regulation" aside={<span>last 3 orbits</span>}>
+        <Section title="Thermal regulation" info="thermal" aside={<span>{thermalLabel(cluster)}</span>}>
           <ThermalChart cluster={cluster} />
           <div className={styles.stats}>
-            <Stat k="Coolant loop" v={fmt.temp(s.loopC)} />
-            <Stat k="Pump flow" v={fmt.pct(s.flow)} warn={s.flow < 0.88} />
-            <Stat k="Heaters" v={s.heaterKw > 0.5 ? `${fmt.kw(s.heaterKw)} · ${fmt.pct(s.heaterKw / cluster.maxHeaterKw)}` : 'off'} />
-            <Stat k="Beta angle" v={`${betaDeg(cluster.orbit).toFixed(0)}°`} />
-            <Stat k="Radiation" v={`${s.seuPerMin.toFixed(1)} SEU/min${s.inSaa ? ' · SAA' : ''}`} />
-            <Stat k="Battery" v={fmt.pct(s.soc)} warn={s.soc < 0.3} />
+            <Stat k="Coolant loop" info="loopTemp" v={fmt.temp(s.loopC)} />
+            <Stat k="Pump flow" info="pumpFlow" v={fmt.pct(s.flow)} warn={s.flow < LIMITS.pumpWarn} />
+            <Stat k="Heaters" info="heaters" v={s.heaterKw > 0.5 ? `${fmt.kw(s.heaterKw)} · ${fmt.pct(s.heaterKw / cluster.maxHeaterKw)}` : 'off'} />
+            <Stat k="Beta angle" info="betaAngle" v={`${betaDeg(cluster.orbit).toFixed(0)}°`} />
+            <Stat k="Radiation" info="radiation" v={`${s.seuPerMin.toFixed(1)} SEU/min${s.inSaa ? ' · SAA' : ''}`} />
+            <Stat k="Battery" info="battery" v={fmt.pct(s.soc)} warn={s.soc < LIMITS.batteryWarn} />
           </div>
         </Section>
 
-        <Section title="Parts" aside={<span>click to inspect</span>}>
+        <Section title="Parts" info="parts" aside={<span>click to inspect</span>}>
           <ModuleGrid clusterId={cluster.id} sample={s} />
         </Section>
 
-        <Section title="Orbit">
+        <Section title="Orbit" info="orbit">
           <OrbitCard cluster={cluster} />
         </Section>
       </ScrollArea>
@@ -104,10 +111,15 @@ export function ClusterSheet({ cluster }: { cluster: ClusterConfig }) {
   )
 }
 
-function Stat({ k, v, warn }: { k: string; v: string; warn?: boolean }) {
+function thermalLabel(cluster: ClusterConfig) {
+  const { span, orbits } = thermalSpan(cluster)
+  return `last ${orbits < 2.95 ? duration(span) : '3 orbits'}`
+}
+
+function Stat({ k, v, warn, info }: { k: string; v: string; warn?: boolean; info: GlossaryKey }) {
   return (
     <div className={styles.stat}>
-      <span>{k}</span>
+      <Term k={info}>{k}</Term>
       <span className={cx(styles.statValue, warn && styles.statWarn)}>{v}</span>
     </div>
   )

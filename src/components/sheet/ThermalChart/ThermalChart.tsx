@@ -2,10 +2,20 @@ import { SIM } from '@/sim/fleet'
 import { periodS } from '@/sim/orbit'
 import type { ClusterConfig } from '@/sim/types'
 import { useApsis } from '@/store'
+import { Explain } from '@/components/ui/Explain'
+import { Term } from '@/components/ui/Term'
+import { duration } from '@/lib/format'
 import styles from './ThermalChart.module.css'
 
 const W = 340
 const H = 132
+
+/** The window the chart shows: three orbits, capped at six hours (which cuts the slow MEO cluster short). */
+export function thermalSpan(cluster: ClusterConfig) {
+  const P = periodS(cluster.orbit)
+  const span = Math.min(3 * P, 6 * 3600)
+  return { span, orbits: span / P }
+}
 
 /**
  * Temperatures over the last three orbits, with Earth's shadow shaded. This is where the regulation
@@ -16,7 +26,7 @@ export function ThermalChart({ cluster }: { cluster: ClusterConfig }) {
   useApsis((s) => s.version)
   const view = useApsis((s) => s.viewTime)
   const all = useApsis((s) => s.history[cluster.id])
-  const span = Math.min(3 * periodS(cluster.orbit), 6 * 3600)
+  const { span } = thermalSpan(cluster)
   const from = view - span
   const pts = all.filter((s) => s.t >= from && s.t <= view)
   if (pts.length < 2) return <div className={styles.empty}>Collecting telemetry…</div>
@@ -40,6 +50,7 @@ export function ThermalChart({ cluster }: { cluster: ClusterConfig }) {
   if (open !== null) bands.push([open, view])
 
   const ticks = [lo, Math.round((lo + hi) / 2), hi]
+  const xTicks = [1, 2 / 3, 1 / 3, 0].map((f) => (f ? `−${duration(span * f).replace(/ 00m$/, '')}` : 'now'))
   return (
     <figure className={styles.chart}>
       <div className={styles.plot}>
@@ -57,25 +68,32 @@ export function ThermalChart({ cluster }: { cluster: ClusterConfig }) {
         <div className={styles.yAxis} aria-hidden>
           {ticks.map((t) => (
             <span key={t} style={{ top: `${(y(t) / H) * 100}%` }}>
-              {t}°
+              {t}°C
             </span>
           ))}
         </div>
       </div>
+      <div className={styles.xAxis} aria-hidden>
+        {xTicks.map((t) => (
+          <span key={t}>{t}</span>
+        ))}
+      </div>
       <figcaption className={styles.legend}>
         <span>
-          <i className={styles.keyHot} /> Hottest module
+          <i className={styles.keyHot} /> <Term k="hottestModule">Hottest module</Term>
         </span>
         <span>
-          <i className={styles.keyLoop} /> Coolant loop
+          <i className={styles.keyLoop} /> <Term k="loopTemp">Coolant loop</Term>
         </span>
         <span>
-          <i className={styles.keyLimit} /> Limit {SIM.moduleLimitC}°
+          <i className={styles.keyLimit} /> <Term k="moduleLimit">Limit {SIM.moduleLimitC}°C</Term>
         </span>
         <span>
-          <i className={styles.keyBand} /> Eclipse
+          <i className={styles.keyBand} /> <Term k="eclipseBand">Eclipse</Term>
         </span>
+        <Term k="thermalChart" />
       </figcaption>
+      <Explain k="thermalChart" className={styles.explain} />
     </figure>
   )
 }

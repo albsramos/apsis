@@ -1,0 +1,9 @@
+.explain {
+  margin: 0;
+  padding: var(--space-1) 0 var(--space-1) var(--space-2);
+  border-left: 2px solid var(--viz-active-soft);
+  color: var(--fg-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: normal;
+}

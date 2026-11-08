@@ -17,6 +17,9 @@
   color: var(--fg-subtle);
   font-size: var(--text-xs);
 }
+.explain {
+  margin: 0 var(--space-4) var(--space-3);
+}
 .counts {
   display: flex;
   gap: var(--space-3);

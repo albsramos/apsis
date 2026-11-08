@@ -10,17 +10,38 @@ export const wingName = (w: number) => (w === 0 ? 'A' : 'B')
 
 type RawFault = Omit<Fault, 'since'>
 
+/** The thresholds every fault is raised at. The sheet's explanations quote these, so they can't drift. */
+export const LIMITS = {
+  /** Pump flow (share of nominal) below which the pump is a warning, and a critical fault */
+  pumpWarn: 0.88,
+  pumpCritical: 0.66,
+  /** Throttle below which output counts as throttled */
+  throttled: 0.97,
+  /** Module headroom under the limit (°C) for a warning, and a critical fault */
+  marginWarn: 6,
+  marginCritical: 2.5,
+  /** Solar-wing tracking error (deg) for a notice, and a warning */
+  wingNotice: 12,
+  wingWarn: 60,
+  /** Upsets a minute that, inside the SAA, raise a notice */
+  seuNotice: 1.2,
+  /** Heater power, share of the maximum, that raises a notice */
+  heaterNotice: 0.2,
+  /** Battery state of charge for a warning */
+  batteryWarn: 0.3,
+} as const
+
 /** Faults follow from the physics, so the same state always gives the same list. */
 export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults' | 'status'>): RawFault[] {
   const out: RawFault[] = []
   const id = (k: string) => `${cfg.id}:${k}`
   const limit = SIM.moduleLimitC
 
-  if (s.pumpHealth < 0.88) {
+  if (s.pumpHealth < LIMITS.pumpWarn) {
     out.push({
       id: id('pump'),
       clusterId: cfg.id,
-      severity: s.pumpHealth < 0.66 ? 'critical' : 'warn',
+      severity: s.pumpHealth < LIMITS.pumpCritical ? 'critical' : 'warn',
       part: { kind: 'loop' },
       title: 'Coolant pump P1 degrading',
       detail: `Loop flow at ${pct(s.flow)} of nominal and falling. Module-to-loop ΔT is widening.`,
@@ -28,7 +49,7 @@ export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults'
     })
   }
 
-  if (s.throttle < 0.97) {
+  if (s.throttle < LIMITS.throttled) {
     out.push({
       id: id('throttle'),
       clusterId: cfg.id,
@@ -42,11 +63,11 @@ export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults'
 
   s.modulesC.forEach((t, i) => {
     const margin = limit - t
-    if (margin < 6) {
+    if (margin < LIMITS.marginWarn) {
       out.push({
         id: id(`mod-${i}`),
         clusterId: cfg.id,
-        severity: margin < 2.5 ? 'critical' : 'warn',
+        severity: margin < LIMITS.marginCritical ? 'critical' : 'warn',
         part: { kind: 'module', index: i },
         title: `Module ${moduleName(i)} running hot`,
         detail: `${c(t)}, ${margin.toFixed(1)}°C under its limit.`,
@@ -70,11 +91,11 @@ export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults'
   })
 
   s.wingErrDeg.forEach((err, w) => {
-    if (err > 12) {
+    if (err > LIMITS.wingNotice) {
       out.push({
         id: id(`wing-${w}`),
         clusterId: cfg.id,
-        severity: err > 60 ? 'warn' : 'info',
+        severity: err > LIMITS.wingWarn ? 'warn' : 'info',
         part: { kind: 'wing', index: w },
         title: `Solar wing ${wingName(w)} drive stalled`,
         detail: `Stuck at ${s.wingAngleDeg[w].toFixed(0)}°, ${err.toFixed(0)}° off the Sun. Power dips once per orbit.`,
@@ -83,7 +104,7 @@ export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults'
     }
   })
 
-  if (s.inSaa && s.seuPerMin > 1.2) {
+  if (s.inSaa && s.seuPerMin > LIMITS.seuNotice) {
     out.push({
       id: id('seu'),
       clusterId: cfg.id,
@@ -95,7 +116,7 @@ export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults'
     })
   }
 
-  if (s.heaterKw > cfg.maxHeaterKw * 0.2) {
+  if (s.heaterKw > cfg.maxHeaterKw * LIMITS.heaterNotice) {
     out.push({
       id: id('heater'),
       clusterId: cfg.id,
@@ -107,7 +128,7 @@ export function deriveFaults(cfg: ClusterConfig, s: Omit<ClusterSample, 'faults'
     })
   }
 
-  if (s.soc < 0.3) {
+  if (s.soc < LIMITS.batteryWarn) {
     out.push({
       id: id('battery'),
       clusterId: cfg.id,

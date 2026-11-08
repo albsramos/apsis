@@ -3,6 +3,7 @@ import { ToggleGroup } from '@/components/ui/ToggleGroup'
 import { Icon } from '@/components/ui/Icon'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Kbd } from '@/components/ui/Kbd'
+import { Term } from '@/components/ui/Term'
 import { SIM } from '@/sim/fleet'
 import { actions, clock, useApsis } from '@/store'
 import { duration, utc } from '@/lib/format'
@@ -36,6 +37,7 @@ export function Timeline() {
         <span className={styles.time}>{time}</span>
         <span className={styles.date}>{live ? date : `T−${duration(offset)}`}</span>
       </div>
+      <Term k="timeline" />
 
       <div className={styles.track}>
         <Slider

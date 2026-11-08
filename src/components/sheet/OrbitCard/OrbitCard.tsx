@@ -4,6 +4,8 @@ import { betaDeg, centralAngleDeg, footprintDeg, inSaa, isEclipsed, periodS, sub
 import type { ClusterConfig } from '@/sim/types'
 import { useApsis } from '@/store'
 import { duration } from '@/lib/format'
+import { Term } from '@/components/ui/Term'
+import type { GlossaryKey } from '@/lib/glossary'
 import styles from './OrbitCard.module.css'
 
 /** Where the cluster is and what comes next: shadow, the SAA, the next ground station. */
@@ -40,26 +42,33 @@ export function OrbitCard({ cluster }: { cluster: ClusterConfig }) {
     return { P, ecl, eclipseChange, here, saaNow, saa, visibleNow, pass }
   }, [o, bucket])
 
-  const rows: [string, string][] = [
-    ['Orbit', o.label],
-    ['Inclination', `${o.incDeg.toFixed(1)}°`],
-    ['Period', duration(info.P)],
-    ['Velocity', `${velocityKms(o).toFixed(2)} km/s`],
-    ['Beta angle', `${betaDeg(o).toFixed(0)}°${Math.abs(betaDeg(o)) > 66 ? ' · always sunlit' : ''}`],
-    ['Sub-point', `${fmtLat(info.here.lat)} ${fmtLon(info.here.lon)}`],
+  const rows: [string, string, GlossaryKey][] = [
+    ['Orbit', o.label, 'orbit'],
+    ['Inclination', `${o.incDeg.toFixed(1)}°`, 'inclination'],
+    ['Period', duration(info.P), 'period'],
+    ['Velocity', `${velocityKms(o).toFixed(2)} km/s`, 'velocity'],
+    ['Beta angle', `${betaDeg(o).toFixed(0)}°${Math.abs(betaDeg(o)) > 66 ? ' · always sunlit' : ''}`, 'betaAngle'],
+    ['Sub-point', `${fmtLat(info.here.lat)} ${fmtLon(info.here.lon)}`, 'subPoint'],
     [
       info.ecl ? 'Leaves shadow' : 'Enters shadow',
       info.eclipseChange === null ? 'not this orbit' : `in ${duration(info.eclipseChange)}`,
+      'shadowNext',
     ],
-    [info.saaNow ? 'Leaves SAA' : 'Next SAA transit', info.saa === null ? 'none soon' : `in ${duration(info.saa)}`],
-    ['Ground contact', info.visibleNow ? `${info.visibleNow.name} · now` : info.pass ? `${info.pass.name} in ${duration(info.pass.in)}` : 'none in 6h'],
+    [info.saaNow ? 'Leaves SAA' : 'Next SAA transit', info.saa === null ? 'none soon' : `in ${duration(info.saa)}`, 'saaNext'],
+    [
+      'Ground contact',
+      info.visibleNow ? `${info.visibleNow.name} · now` : info.pass ? `${info.pass.name} in ${duration(info.pass.in)}` : 'none in 6h',
+      'groundContact',
+    ],
   ]
 
   return (
     <dl className={styles.list}>
-      {rows.map(([k, v]) => (
+      {rows.map(([k, v, g]) => (
         <div key={k} className={styles.row}>
-          <dt>{k}</dt>
+          <dt>
+            <Term k={g}>{k}</Term>
+          </dt>
           <dd>{v}</dd>
         </div>
       ))}

@@ -33,7 +33,14 @@ The simulation is deterministic and physics-driven, so what you see has a cause:
 
 ## Keys
 
-`⌘K` search · `1 2 3` lenses · `J / K` next / previous cluster · `F` follow · `Space` play / pause · `Esc` back
+`⌘K` search · `1 2 3` lenses · `J / K` next / previous cluster · `F` follow · `Space` play / pause · `?` explain · `Esc` back
+
+## What every number means
+
+Press **Explain** (or `?`) and every section and headline number shows, in one line, what it measures. Click any
+ⓘ or dotted-underlined label for the full story: what it is, how the model computes it, and the thresholds that
+turn it yellow or red. The same text, laid out for presenting, is in [docs/METRICS.md](docs/METRICS.md); the
+in-app copy lives in `src/lib/glossary.ts`.
 
 ## Run it
 

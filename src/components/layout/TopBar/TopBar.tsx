@@ -16,6 +16,7 @@ export const LENSES: { value: Lens; label: string; icon: 'bolt' | 'thermo' | 'al
 
 export function TopBar() {
   const lens = useApsis((s) => s.lens)
+  const explain = useApsis((s) => s.explain)
   return (
     <header className={styles.bar}>
       <a className={styles.brand} href="/" onClick={(e) => (e.preventDefault(), actions.select(null))}>
@@ -41,6 +42,12 @@ export function TopBar() {
       />
 
       <div className={styles.right}>
+        <Tooltip content={<>Show what every number measures <Kbd>?</Kbd></>}>
+          <button type="button" className={cx(styles.explain, explain && styles.explainOn)} onClick={actions.toggleExplain} aria-pressed={explain}>
+            <Icon name="info" size={14} />
+            <span className={styles.explainLabel}>Explain</span>
+          </button>
+        </Tooltip>
         <Tooltip content={<>Jump to a cluster or fault <Kbd>⌘K</Kbd></>}>
           <button type="button" className={styles.search} onClick={() => actions.setPalette(true)}>
             <Icon name="search" size={14} />
