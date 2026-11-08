@@ -26,7 +26,7 @@ export function AppShell() {
   // The URL is the selection.
   useEffect(() => {
     useApsis.setState({ selectedId: cluster?.id ?? null, focusPart: null, pickedPart: null })
-    document.title = cluster ? `${cluster.code} ${cluster.name} · Apsis` : 'Apsis · Kestrel Orbital'
+    document.title = cluster ? `${cluster.code} ${cluster.name} · Apsis` : 'Apsis'
   }, [cluster])
   useEffect(() => {
     if (id && !cluster) navigate('/', { replace: true })

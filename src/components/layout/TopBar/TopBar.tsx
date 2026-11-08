@@ -21,7 +21,6 @@ export function TopBar() {
       <a className={styles.brand} href="/" onClick={(e) => (e.preventDefault(), actions.select(null))}>
         <Logo />
         <span className={styles.name}>Apsis</span>
-        <span className={styles.company}>Kestrel Orbital</span>
       </a>
 
       <ToggleGroup

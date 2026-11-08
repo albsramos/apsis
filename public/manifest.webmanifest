@@ -1,7 +1,7 @@
 {
-  "name": "Apsis · Kestrel Orbital",
+  "name": "Apsis",
   "short_name": "Apsis",
-  "description": "Mission control for Kestrel Orbital's data centers in space.",
+  "description": "Mission control for data centers in space.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
