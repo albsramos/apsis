@@ -8,49 +8,61 @@
   user-select: none;
   cursor: pointer;
 }
+/* Not clipped, so the range's glow can spill past the bar's edges */
 .track {
   position: relative;
   flex: 1;
   height: 4px;
-  overflow: hidden;
   border-radius: 999px;
   background: var(--surface-hover);
-  transition: box-shadow var(--duration) var(--ease);
 }
 .range {
   position: absolute;
   height: 100%;
+  border-radius: inherit;
   background: color-mix(in srgb, var(--viz-active) 55%, transparent);
-  transition: background var(--duration) var(--ease);
 }
-/* A slim playhead rather than a knob */
+/* The glow: a blurred ramp that is strongest at the ball and fades out behind it */
+.range::after {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  bottom: -3px;
+  width: min(100%, 160px);
+  border-radius: inherit;
+  background: linear-gradient(to right, transparent, var(--viz-active));
+  filter: blur(5px);
+  opacity: 0;
+  content: '';
+  transition: opacity var(--duration) var(--ease);
+  pointer-events: none;
+}
 .thumb {
   display: block;
-  width: 4px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--viz-active);
   border-radius: 999px;
-  background: var(--viz-active);
-  transition:
-    transform var(--duration) var(--ease),
-    box-shadow var(--duration) var(--ease);
+  background: var(--bg);
+  box-shadow: 0 0 0 4px var(--viz-active-soft);
+  transition: transform var(--duration) var(--ease);
 }
 .thumb:hover {
-  transform: scaleY(1.15);
+  transform: scale(1.15);
 }
 .thumb:focus-visible {
   outline: 2px solid var(--ring);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
-.root[data-dragging] .thumb {
-  transform: scaleY(1.2);
-  box-shadow:
-    0 0 8px var(--viz-active),
-    0 0 18px var(--viz-active-soft);
-}
+/* While dragging, the bar itself brightens towards the ball and glows */
 .root[data-dragging] .range {
-  background: var(--viz-active);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--viz-active) 45%, transparent),
+    color-mix(in srgb, var(--viz-active) 70%, transparent) 60%,
+    var(--viz-active)
+  );
 }
-/* The track clips its range, so the bar's glow sits on the track itself */
-.root[data-dragging] .track {
-  box-shadow: 0 0 10px var(--viz-active-soft);
+.root[data-dragging] .range::after {
+  opacity: 0.9;
 }
