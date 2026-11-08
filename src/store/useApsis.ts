@@ -46,6 +46,8 @@ interface State {
   follow: boolean
   paletteOpen: boolean
   drawerOpen: boolean
+  /** Explain mode: every section and number shows what it measures, inline */
+  explain: boolean
   navigate: ((path: string) => void) | null
 }
 
@@ -68,6 +70,7 @@ export const useApsis = create<State>(() => ({
   follow: true,
   paletteOpen: false,
   drawerOpen: false,
+  explain: false,
   navigate: null,
 }))
 
@@ -106,6 +109,7 @@ export const actions = {
   goLive: () => actions.scrub(0),
   setPalette: (paletteOpen: boolean) => set({ paletteOpen }),
   setDrawer: (drawerOpen: boolean) => set({ drawerOpen }),
+  toggleExplain: () => set({ explain: !get().explain }),
 }
 
 /** The newest history sample at or before `t` (binary search). */

@@ -4,15 +4,24 @@ import { StatTile } from '@/components/ui/StatTile'
 import { Sparkline } from '@/components/ui/Sparkline'
 import { StatusDot } from '@/components/ui/StatusDot'
 import { Section } from '@/components/ui/Section'
+import { Explain } from '@/components/ui/Explain'
+import { Term } from '@/components/ui/Term'
 import { FLEET, SIM } from '@/sim/fleet'
 import { rank } from '@/sim/faults'
 import type { ClusterConfig, ClusterSample, Lens } from '@/sim/types'
 import { actions, telemetry, useApsis } from '@/store'
-import { fmt } from '@/lib/format'
+import { fmt, range } from '@/lib/format'
 import { cx } from '@/lib/cx'
 import styles from './FleetSheet.module.css'
 
 const STATUS_RANK = { critical: 0, degraded: 1, nominal: 2 } as const
+
+/** What the right-hand column of the cluster list shows, which depends on the lens. */
+const LENS_COLUMN: Record<Lens, string> = {
+  output: 'output · bar = utilisation',
+  thermal: 'hottest module · bar to 45°C',
+  faults: 'worst fault',
+}
 
 /** The fleet at a glance: totals, then every cluster, the ones that need attention first. */
 export function FleetSheet() {
@@ -54,35 +63,54 @@ export function FleetSheet() {
     <>
       <header className={styles.header}>
         <div>
-          <h2 className={styles.title}>Fleet</h2>
-          <p className={styles.sub}>{FLEET.length} clusters in 4 orbit classes</p>
+          <h2 className={styles.title}>
+            Fleet <Term k="data" />
+          </h2>
+          <p className={styles.sub}>{FLEET.length} clusters in 4 orbit classes · simulated</p>
         </div>
-        <div className={styles.counts}>
-          {(['critical', 'degraded', 'nominal'] as const).map((s) => (
-            <span key={s} className={styles.count} title={s}>
-              <StatusDot status={s} size={7} /> {counts[s]}
-            </span>
-          ))}
-        </div>
+        <Term k="statusCounts">
+          <span className={styles.counts}>
+            {(['critical', 'degraded', 'nominal'] as const).map((s) => (
+              <span key={s} className={styles.count} title={s}>
+                <StatusDot status={s} size={7} /> {counts[s]}
+              </span>
+            ))}
+          </span>
+        </Term>
       </header>
+      <Explain k="data" className={styles.explain} />
       <ScrollArea className={styles.scroll}>
         <div className={styles.kpis}>
-          <StatTile label="Fleet output" value={fmt.pf(totalPf)} hint="FP8, all clusters" chart={<Sparkline values={outputSeries} />} />
-          <StatTile label="Power draw" value={fmt.kw(drawKw)} hint={`${fmt.kw(rows.reduce((a, r) => a + r.s.genKw, 0))} generated`} />
+          <StatTile
+            label="Fleet output"
+            info="fleetOutput"
+            value={fmt.pf(totalPf)}
+            hint="FP8 petaflops, all clusters"
+            chart={<Sparkline values={outputSeries} />}
+            axis={{ from: `−${Math.round((n * SIM.sampleEvery) / 60)}m`, range: range(outputSeries, fmt.pf) }}
+          />
+          <StatTile
+            label="Power draw"
+            info="fleetPower"
+            value={fmt.kw(drawKw)}
+            hint={`${fmt.kw(rows.reduce((a, r) => a + r.s.genKw, 0))} generated`}
+          />
           <StatTile
             label="Active faults"
+            info="activeFaults"
             value={faults.length}
             tone={faults.some((f) => f.severity === 'critical') ? 'danger' : faults.length ? 'warn' : undefined}
             hint={faults[0]?.title ?? 'All clear'}
           />
           <StatTile
             label="In shadow"
+            info="inShadow"
             value={`${rows.filter((r) => r.s.eclipse).length} / ${rows.length}`}
-            hint="on battery, heaters ready"
+            hint="clusters in Earth’s shadow"
           />
         </div>
 
-        <Section title="Clusters" aside={<span>sorted by attention</span>}>
+        <Section title="Clusters" info="clusterList" aside={<span>{LENS_COLUMN[lens]}</span>}>
           <ul className={styles.list} onKeyDown={onKey}>
             {rows.map(({ c, s }) => (
               <li key={c.id}>

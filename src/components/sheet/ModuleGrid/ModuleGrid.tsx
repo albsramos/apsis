@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { moduleName, segmentName } from '@/sim/faults'
 import type { ClusterSample, PartRef } from '@/sim/types'
 import { actions, useApsis } from '@/store'
+import { Term } from '@/components/ui/Term'
 import { heatCss, MODULE_SCALE, RADIATOR_SCALE } from '@/lib/heat'
 import { samePart } from '@/lib/parts'
 import { cx } from '@/lib/cx'
@@ -13,7 +14,9 @@ export function ModuleGrid({ clusterId, sample }: { clusterId: string; sample: C
   return (
     <div className={styles.wrap}>
       <div className={styles.group}>
-        <div className={styles.label}>Compute modules</div>
+        <div className={styles.label}>
+          <Term k="modules">Compute modules</Term> · °C
+        </div>
         <div className={styles.modules}>
           {sample.modulesC.map((t, i) => (
             <Tile
@@ -29,7 +32,9 @@ export function ModuleGrid({ clusterId, sample }: { clusterId: string; sample: C
         </div>
       </div>
       <div className={styles.group}>
-        <div className={styles.label}>Radiator segments, inlet → outlet</div>
+        <div className={styles.label}>
+          <Term k="segments">Radiator segments</Term>, inlet → outlet · °C
+        </div>
         <div className={styles.segments}>
           {sample.segmentsC.map((t, k) => (
             <Tile

@@ -61,6 +61,30 @@
   min-width: 96px;
   text-align: left;
 }
+.explain {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--control-md);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease), color var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+.explain:hover {
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
+.explainOn {
+  border-color: var(--viz-active);
+  background: var(--viz-active-soft);
+  color: var(--fg);
+}
 .clock {
   display: flex;
   align-items: center;
@@ -104,6 +128,14 @@
   }
 }
 @media (max-width: 760px) {
+  .explain {
+    width: var(--control-icon);
+    padding: 0;
+    justify-content: center;
+  }
+  .explainLabel {
+    display: none;
+  }
   .bar {
     grid-template-columns: auto 1fr auto;
     gap: var(--space-2);

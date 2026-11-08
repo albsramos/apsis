@@ -29,3 +29,11 @@ export function utc(t: number) {
 export function ago(seconds: number) {
   return seconds < 60 ? 'just now' : `${duration(seconds).split(' ')[0]} ago`
 }
+
+/** "12–34 PF": the span of a series, for charts that auto-scale. Empty for an empty series. */
+export function range(values: number[], f: (x: number) => string) {
+  if (!values.length) return ''
+  const lo = f(Math.min(...values))
+  const hi = f(Math.max(...values))
+  return lo === hi ? lo : `${lo} – ${hi}`
+}

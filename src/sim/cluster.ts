@@ -21,9 +21,12 @@ const EPS = 0.88
 const K = 273.15
 const Q_SUN = 120 // W/m² absorbed by radiators in sunlight (edge-on, mostly albedo)
 const Q_IR = 70 // W/m² Earth IR, always
-const DESIGN_DT = 17 // K, module above loop at full flow
-const HEATER_SET = 4 // °C
-const OVERHEAD = 0.07 // avionics and comms, share of capacity
+export const DESIGN_DT = 17 // K, module above loop at full flow
+export const HEATER_SET = 4 // °C
+export const OVERHEAD = 0.07 // avionics and comms, share of capacity
+/** The scheduler starts throttling this far under the module limit (°C), and releases this far under it */
+export const THROTTLE_AT = 1.2
+export const THROTTLE_RELEASE = 4
 
 interface State {
   util: number
@@ -99,8 +102,8 @@ export class ClusterSim {
 
     // Thermal throttle: hold the hottest module just under the limit.
     const hottest = Math.max(...s.modulesC)
-    if (hottest > SIM.moduleLimitC - 1.2) s.throttle = Math.max(0.45, s.throttle - 0.015 * (dt / 10))
-    else if (hottest < SIM.moduleLimitC - 4) s.throttle = Math.min(1, s.throttle + 0.006 * (dt / 10))
+    if (hottest > SIM.moduleLimitC - THROTTLE_AT) s.throttle = Math.max(0.45, s.throttle - 0.015 * (dt / 10))
+    else if (hottest < SIM.moduleLimitC - THROTTLE_RELEASE) s.throttle = Math.min(1, s.throttle + 0.006 * (dt / 10))
 
     const util = s.util * s.throttle
     const itKw = cfg.capacityKw * util

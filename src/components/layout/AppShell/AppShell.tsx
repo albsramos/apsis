@@ -11,6 +11,7 @@ import { TopBar } from '../TopBar'
 import { Timeline } from '../Timeline'
 import { SidePanel } from '../SidePanel'
 import { CommandPalette } from '../CommandPalette'
+import { LensLegend } from '../LensLegend'
 import styles from './AppShell.module.css'
 
 /** The whole app: scene behind, top bar, the information sheet on the left, time at the bottom. */
@@ -52,6 +53,7 @@ export function AppShell() {
         actions.togglePlay()
       },
       f: () => actions.toggleFollow(),
+      '?': () => actions.toggleExplain(),
     }),
     [],
   )
@@ -69,6 +71,7 @@ export function AppShell() {
           <Timeline />
         </div>
         <Hint />
+        <LensLegend />
         <CommandPalette />
       </div>
     </TooltipProvider>
