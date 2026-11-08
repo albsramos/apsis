@@ -36,7 +36,9 @@
   --radius-lg: 12px;
 
   --sheet-width: 380px;
-  --topbar-height: 56px;
+  /* Below the status bar when installed as a PWA (viewport-fit=cover draws under it). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --topbar-height: calc(56px + var(--safe-top));
   --drawer-peek: 196px;
 
   --ease: cubic-bezier(0.2, 0, 0, 1);
