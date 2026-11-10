@@ -1,0 +1,11 @@
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  animation: pulse 1.4s var(--ease) infinite alternate;
+}
+@keyframes pulse {
+  to {
+    background: var(--surface-hover);
+  }
+}

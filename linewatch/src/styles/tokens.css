@@ -1,0 +1,141 @@
+/*
+ * Design tokens. Everything visual reads from here, the line map included.
+ * Neutral zinc scale (shadcn-like), one accent, one radius scale. Components use these vars only, never raw hex.
+ *
+ * Colour carries meaning, and only these meanings:
+ *   red (--danger) a fault · amber (--viz-warn) a warning · green (--viz-done) all good · blue (--viz-active) neutral data.
+ * Everything else is the zinc scale.
+ */
+:root {
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  /* Text in form controls. Bumped to 16px on touch screens below: iOS zooms the page on anything smaller. */
+  --text-control: var(--text-xs);
+
+  /* Control heights. Touch screens get ~44px targets. */
+  --control-sm: 30px;
+  --control-md: 36px;
+  --control-icon: 32px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  --sheet-width: 380px;
+  --topbar-height: 56px;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration: 160ms;
+  /* A carrier glides from one reported position to the next: a little longer than the polling interval. */
+  --duration-move: 1100ms;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --text-control: 16px;
+    --control-sm: 40px;
+    --control-md: 44px;
+    --control-icon: 44px;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --surface: #f4f4f5;
+  --surface-hover: #e4e4e7;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --fg: #09090b;
+  --fg-muted: #52525b;
+  --fg-subtle: #71717a;
+  --accent: #18181b;
+  --accent-fg: #fafafa;
+  --ring: #a1a1aa;
+  --overlay: rgb(9 9 11 / 0.4);
+  --shadow: 0 12px 40px rgb(0 0 0 / 0.14);
+
+  --viz-active: #2563eb;
+  --viz-active-soft: rgb(37 99 235 / 0.1);
+  --viz-done: #16a34a;
+  --viz-done-soft: rgb(22 163 74 / 0.1);
+  --viz-warn: #d97706;
+  --viz-warn-soft: rgb(217 119 6 / 0.12);
+  --danger: #dc2626;
+  --danger-soft: rgb(220 38 38 / 0.1);
+
+  /* The line map */
+  --canvas: #fafafa;
+  --track: #d4d4d8;
+  --node: #71717a;
+  --carrier: #71717a;
+  /* Payload types (categorical) */
+  --cat-1: #2563eb;
+  --cat-2: #0d9488;
+  --cat-3: #7c3aed;
+  --cat-4: #db2777;
+  /* Dwell against expected (sequential): on time to several times over */
+  --dwell-0: #dbeafe;
+  --dwell-1: #93c5fd;
+  --dwell-2: #3b82f6;
+  --dwell-3: #1d4ed8;
+  --dwell-4: #172554;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #09090b;
+  --bg-subtle: #0f0f12;
+  --surface: #18181b;
+  --surface-hover: #1f1f23;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --fg: #fafafa;
+  --fg-muted: #a1a1aa;
+  --fg-subtle: #8b8b94;
+  --accent: #fafafa;
+  --accent-fg: #18181b;
+  --ring: #52525b;
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+
+  --viz-active: #60a5fa;
+  --viz-active-soft: rgb(96 165 250 / 0.16);
+  --viz-done: #4ade80;
+  --viz-done-soft: rgb(74 222 128 / 0.14);
+  --viz-warn: #fbbf24;
+  --viz-warn-soft: rgb(251 191 36 / 0.16);
+  --danger: #f87171;
+  --danger-soft: rgb(248 113 113 / 0.16);
+
+  --canvas: #09090b;
+  --track: #3f3f46;
+  --node: #a1a1aa;
+  --carrier: #a1a1aa;
+  --cat-1: #60a5fa;
+  --cat-2: #2dd4bf;
+  --cat-3: #a78bfa;
+  --cat-4: #f472b6;
+  --dwell-0: #1e3a8a;
+  --dwell-1: #1d4ed8;
+  --dwell-2: #3b82f6;
+  --dwell-3: #93c5fd;
+  --dwell-4: #eff6ff;
+}

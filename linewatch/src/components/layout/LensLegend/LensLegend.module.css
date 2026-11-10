@@ -1,0 +1,86 @@
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: calc(100% - 2 * var(--space-3));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+.items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+.items li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--carrier);
+}
+.empty {
+  border: 2px solid var(--carrier);
+  background: transparent;
+}
+.warning {
+  background: var(--viz-warn);
+}
+.fault {
+  background: var(--danger);
+}
+.carBody {
+  background: var(--cat-1);
+}
+.carPlastics {
+  background: var(--cat-2);
+}
+.robotArm {
+  background: var(--cat-3);
+}
+.robotPart {
+  background: var(--cat-4);
+}
+.caption {
+  color: var(--fg-subtle);
+  font-size: var(--text-2xs);
+}
+.ramp {
+  display: flex;
+  gap: 2px;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 52px;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+.bar {
+  height: 8px;
+  border-radius: var(--radius-sm);
+}
+.dwell0 {
+  background: var(--dwell-0);
+}
+.dwell1 {
+  background: var(--dwell-1);
+}
+.dwell2 {
+  background: var(--dwell-2);
+}
+.dwell3 {
+  background: var(--dwell-3);
+}
+.dwell4 {
+  background: var(--dwell-4);
+}

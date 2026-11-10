@@ -1,0 +1,190 @@
+.map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+.message {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: var(--space-5);
+  color: var(--fg-subtle);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+/* ---- track ---- */
+.track {
+  fill: none;
+  stroke: var(--track);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke var(--duration-move) var(--ease);
+}
+.map[data-lens='dwell'] .track {
+  stroke-width: 13;
+}
+.map[data-lens='dwell'] .track[data-level='0'] {
+  stroke: var(--dwell-0);
+}
+.map[data-lens='dwell'] .track[data-level='1'] {
+  stroke: var(--dwell-1);
+}
+.map[data-lens='dwell'] .track[data-level='2'] {
+  stroke: var(--dwell-2);
+}
+.map[data-lens='dwell'] .track[data-level='3'] {
+  stroke: var(--dwell-3);
+}
+.map[data-lens='dwell'] .track[data-level='4'] {
+  stroke: var(--dwell-4);
+}
+.starved {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1 10;
+}
+
+/* ---- nodes ---- */
+.node rect,
+.node circle {
+  fill: var(--bg);
+  stroke: var(--node);
+  stroke-width: 2;
+}
+.junction circle {
+  fill: var(--track);
+  stroke: none;
+}
+.buffer rect {
+  stroke-dasharray: 4 3;
+}
+.starving rect {
+  stroke: var(--danger);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 4;
+}
+.label {
+  fill: var(--fg-subtle);
+  font-family: var(--font-sans);
+  /* Layout units, not screen pixels: the label scales with the map. */
+  font-size: 11px;
+  font-weight: 500;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--canvas);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.starving .label {
+  fill: var(--danger);
+}
+
+/* ---- carriers ---- */
+.carrier {
+  --c: var(--carrier);
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform var(--duration-move) linear,
+    opacity var(--duration) var(--ease);
+}
+.jump {
+  transition: opacity var(--duration) var(--ease);
+}
+.hit {
+  fill: transparent;
+}
+.dot {
+  fill: var(--c);
+  stroke: var(--canvas);
+  stroke-width: 1.5;
+  transition: fill var(--duration) var(--ease);
+}
+.carrier[data-loaded='false'] .dot {
+  fill: var(--canvas);
+  stroke: var(--c);
+  stroke-width: 2.5;
+}
+.carrier:hover .dot,
+.carrier:focus-visible .dot {
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+.halo {
+  fill: var(--c);
+  opacity: 0.22;
+}
+.carrier[data-status='fault'] .halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse 1.6s var(--ease) infinite alternate;
+}
+.ring {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+
+/* Problems keep their colour under every lens. */
+.carrier[data-status='warning'] {
+  --c: var(--viz-warn);
+}
+.carrier[data-status='fault'] {
+  --c: var(--danger);
+}
+
+.map[data-lens='payload'] .carrier[data-type='car_body'] {
+  --c: var(--cat-1);
+}
+.map[data-lens='payload'] .carrier[data-type='car_plastics'] {
+  --c: var(--cat-2);
+}
+.map[data-lens='payload'] .carrier[data-type='robot_arm'] {
+  --c: var(--cat-3);
+}
+.map[data-lens='payload'] .carrier[data-type='robot_part'] {
+  --c: var(--cat-4);
+}
+.map[data-lens='payload'] .halo {
+  fill: var(--danger);
+}
+.map[data-lens='payload'] .carrier[data-status='warning'] .halo {
+  fill: var(--viz-warn);
+}
+
+.map[data-lens='dwell'] .carrier[data-status='ok'] .dot {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 2;
+  transform: scale(0.62);
+}
+
+/* ---- selection ---- */
+.dimmed {
+  opacity: 0.35;
+}
+.queued[data-status='ok'] {
+  --c: var(--fg);
+}
+
+@keyframes pulse {
+  to {
+    transform: scale(1.35);
+    opacity: 0.1;
+  }
+}
+
+@media (max-width: 760px) {
+  .label {
+    font-size: 15px;
+  }
+  .node:not(.station) .label {
+    display: none;
+  }
+}

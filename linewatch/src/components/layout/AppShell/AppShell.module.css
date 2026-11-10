@@ -1,0 +1,62 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.sheet {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: var(--sheet-width);
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+}
+.scroll {
+  flex: 1;
+}
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--canvas);
+}
+.map {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-4);
+}
+.legend {
+  display: flex;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+/* Narrow screens: the map on top, the sheet as a drawer beneath it. */
+@media (max-width: 760px) {
+  .body {
+    flex-direction: column-reverse;
+  }
+  .sheet {
+    flex: 1;
+    width: auto;
+    border-top: 1px solid var(--border);
+    border-right: 0;
+  }
+  .stage {
+    flex: none;
+    height: 44dvh;
+  }
+  .map {
+    padding: var(--space-2);
+  }
+  .legend {
+    padding: 0 var(--space-3) var(--space-2);
+  }
+}

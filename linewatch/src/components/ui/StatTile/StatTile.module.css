@@ -1,0 +1,35 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.label {
+  color: var(--fg-subtle);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+}
+.value {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.hint {
+  color: var(--fg-subtle);
+  font-size: var(--text-2xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chart {
+  margin-top: var(--space-1);
+}
+.warn .value {
+  color: var(--viz-warn);
+}
+.danger .value {
+  color: var(--danger);
+}

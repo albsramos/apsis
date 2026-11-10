@@ -1,0 +1,336 @@
+openapi: 3.0.3
+info:
+  title: Linewatch API
+  version: 0.1.0
+  description: >
+    The contract between the Linewatch front end and its backend. Today the front end answers it from a mock
+    server (src/mocks). When the real backend exists, point orval.config.ts at its Swagger document and run
+    `npm run api:sync`.
+servers:
+  - url: /api
+tags:
+  - name: factories
+  - name: carriers
+  - name: issues
+paths:
+  /factories:
+    get:
+      tags: [factories]
+      operationId: listFactories
+      summary: The factories this user can see
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Factory' }
+  /factories/{factoryId}/layout:
+    get:
+      tags: [factories]
+      operationId: getLayout
+      summary: The published layout of a factory (nodes, segments and their geometry)
+      parameters:
+        - $ref: '#/components/parameters/factoryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Layout' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /factories/{factoryId}/stats:
+    get:
+      tags: [factories]
+      operationId: getFactoryStats
+      summary: Headline numbers and dwell per segment
+      parameters:
+        - $ref: '#/components/parameters/factoryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FactoryStats' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /factories/{factoryId}/carriers:
+    get:
+      tags: [carriers]
+      operationId: listCarriers
+      summary: Every carrier on the line, with its position
+      parameters:
+        - $ref: '#/components/parameters/factoryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Carrier' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /factories/{factoryId}/carriers/{carrierId}:
+    get:
+      tags: [carriers]
+      operationId: getCarrier
+      summary: One carrier with its faults, payload and trail
+      parameters:
+        - $ref: '#/components/parameters/factoryId'
+        - name: carrierId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarrierDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /factories/{factoryId}/issues:
+    get:
+      tags: [issues]
+      operationId: listIssues
+      summary: Open issues, ranked by impact on the line
+      parameters:
+        - $ref: '#/components/parameters/factoryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Issue' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  parameters:
+    factoryId:
+      name: factoryId
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+  schemas:
+    ApiError:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+
+    Factory:
+      type: object
+      required: [id, name, location, layoutVersion]
+      properties:
+        id: { type: string, example: us-austin }
+        name: { type: string, example: Austin }
+        location: { type: string, example: 'Texas, US' }
+        layoutVersion: { type: integer }
+
+    Point:
+      type: object
+      required: [x, y]
+      properties:
+        x: { type: number }
+        y: { type: number }
+
+    NodeKind:
+      type: string
+      enum: [station, buffer, junction, entry, exit]
+
+    LayoutNode:
+      type: object
+      required: [id, kind, name, x, y]
+      properties:
+        id: { type: string }
+        kind: { $ref: '#/components/schemas/NodeKind' }
+        name: { type: string }
+        code: { type: string, description: Short label drawn on the map }
+        x: { type: number }
+        y: { type: number }
+
+    LayoutSegment:
+      type: object
+      required: [id, from, to, points, lengthM, expectedSec]
+      properties:
+        id: { type: string }
+        from: { type: string, description: Node id }
+        to: { type: string, description: Node id }
+        points:
+          type: array
+          description: The polyline of the segment, in layout units, from `from` to `to`
+          items: { $ref: '#/components/schemas/Point' }
+        lengthM: { type: number }
+        expectedSec:
+          type: number
+          description: How long a carrier normally spends here, the stop at the end station included
+
+    Layout:
+      type: object
+      required: [factoryId, version, width, height, nodes, segments]
+      properties:
+        factoryId: { type: string }
+        version: { type: integer }
+        width: { type: number, description: Layout units }
+        height: { type: number, description: Layout units }
+        nodes:
+          type: array
+          items: { $ref: '#/components/schemas/LayoutNode' }
+        segments:
+          type: array
+          items: { $ref: '#/components/schemas/LayoutSegment' }
+
+    Severity:
+      type: string
+      enum: [ok, warning, fault]
+
+    PayloadType:
+      type: string
+      enum: [car_body, car_plastics, robot_arm, robot_part]
+
+    CarrierPosition:
+      type: object
+      required: [segmentId, offset]
+      properties:
+        segmentId: { type: string }
+        offset: { type: number, minimum: 0, maximum: 1, description: Fraction along the segment }
+
+    Carrier:
+      type: object
+      required: [id, status, loaded, position, dwellSec, expectedSec]
+      properties:
+        id: { type: string, example: C-0142 }
+        status:
+          allOf: [{ $ref: '#/components/schemas/Severity' }]
+          description: The worse of the carrier's own state and its payload's
+        loaded: { type: boolean }
+        payloadId: { type: string }
+        payloadType: { $ref: '#/components/schemas/PayloadType' }
+        position: { $ref: '#/components/schemas/CarrierPosition' }
+        dwellSec: { type: number, description: Time spent on the current segment }
+        expectedSec: { type: number, description: Normal time for the current segment }
+
+    Fault:
+      type: object
+      required: [id, code, title, severity, since]
+      properties:
+        id: { type: string }
+        code: { type: string, example: DRV-204 }
+        title: { type: string }
+        detail: { type: string }
+        severity: { $ref: '#/components/schemas/Severity' }
+        since: { type: string, format: date-time }
+
+    Defect:
+      type: object
+      required: [id, title, severity, foundAt, at]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        severity: { $ref: '#/components/schemas/Severity' }
+        foundAt: { type: string, description: Name of the station that found it }
+        at: { type: string, format: date-time }
+
+    Payload:
+      type: object
+      required: [id, type, name, status, defects]
+      properties:
+        id: { type: string, description: Serial or VIN }
+        type: { $ref: '#/components/schemas/PayloadType' }
+        name: { type: string }
+        variant: { type: string }
+        orderId: { type: string }
+        status: { $ref: '#/components/schemas/Severity' }
+        nextOperation: { type: string }
+        defects:
+          type: array
+          items: { $ref: '#/components/schemas/Defect' }
+
+    TrailStep:
+      type: object
+      required: [nodeId, nodeName, at, durationSec, result]
+      properties:
+        nodeId: { type: string }
+        nodeName: { type: string }
+        at: { type: string, format: date-time }
+        durationSec: { type: number }
+        result: { $ref: '#/components/schemas/Severity' }
+
+    CarrierDetail:
+      allOf:
+        - $ref: '#/components/schemas/Carrier'
+        - type: object
+          required: [model, batteryPct, cyclesSinceService, fromNodeName, toNodeName, faults, trail]
+          properties:
+            model: { type: string }
+            batteryPct: { type: number }
+            cyclesSinceService: { type: integer }
+            fromNodeName: { type: string }
+            toNodeName: { type: string }
+            faults:
+              type: array
+              items: { $ref: '#/components/schemas/Fault' }
+            payload: { $ref: '#/components/schemas/Payload' }
+            trail:
+              type: array
+              description: Newest first
+              items: { $ref: '#/components/schemas/TrailStep' }
+
+    IssueKind:
+      type: string
+      enum: [carrier, payload]
+
+    IssueImpact:
+      type: object
+      required: [queuedCarrierIds]
+      properties:
+        queuedCarrierIds:
+          type: array
+          description: Carriers held up behind this one, nearest first
+          items: { type: string }
+        starvedNodeId:
+          type: string
+          description: The next station downstream, when nothing is on its way to it
+
+    Issue:
+      type: object
+      required: [id, kind, severity, carrierId, title, location, since, impact]
+      properties:
+        id: { type: string }
+        kind: { $ref: '#/components/schemas/IssueKind' }
+        severity: { $ref: '#/components/schemas/Severity' }
+        carrierId: { type: string }
+        title: { type: string }
+        location: { type: string }
+        since: { type: string, format: date-time }
+        impact: { $ref: '#/components/schemas/IssueImpact' }
+
+    SegmentDwell:
+      type: object
+      required: [segmentId, ratio, carriers]
+      properties:
+        segmentId: { type: string }
+        ratio: { type: number, description: Slowest carrier's time on the segment over the expected time }
+        carriers: { type: integer }
+
+    FactoryStats:
+      type: object
+      required: [carriers, loaded, throughputPerHour, throughputHistory, openIssues, segmentDwell]
+      properties:
+        carriers: { type: integer }
+        loaded: { type: integer }
+        throughputPerHour: { type: number }
+        throughputHistory:
+          type: array
+          description: Units per hour, oldest first
+          items: { type: number }
+        openIssues: { type: integer }
+        segmentDwell:
+          type: array
+          items: { $ref: '#/components/schemas/SegmentDwell' }

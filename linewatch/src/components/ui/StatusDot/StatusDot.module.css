@@ -1,0 +1,29 @@
+.dot {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  border-radius: var(--radius-full);
+}
+.ok {
+  background: var(--carrier);
+}
+.warning {
+  background: var(--viz-warn);
+}
+.fault {
+  background: var(--danger);
+}
+.fault::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--danger);
+  animation: ping 1.6s var(--ease) infinite;
+}
+@keyframes ping {
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}

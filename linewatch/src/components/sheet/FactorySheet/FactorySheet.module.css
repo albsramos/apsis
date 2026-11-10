@@ -1,0 +1,53 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+}
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.name {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.sub {
+  color: var(--fg-subtle);
+  font-size: var(--text-sm);
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.quiet {
+  color: var(--fg-subtle);
+  font-size: var(--text-sm);
+}
+.slow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.stretch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.stretchRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+.ratio {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}

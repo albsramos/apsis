@@ -1,0 +1,110 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--overlay);
+  animation: fade var(--duration) var(--ease);
+}
+.content {
+  position: fixed;
+  top: 14vh;
+  left: 50%;
+  z-index: 41;
+  width: min(560px, calc(100vw - 2 * var(--space-4)));
+  transform: translateX(-50%);
+  animation: pop var(--duration) var(--ease);
+}
+.command {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-subtle);
+}
+.input {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--fg);
+  font-size: max(var(--text-control), var(--text-sm));
+}
+.input::placeholder {
+  color: var(--fg-subtle);
+}
+.list {
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+.group [cmdk-group-heading] {
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  color: var(--fg-subtle);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 38px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.item[data-selected='true'] {
+  background: var(--surface);
+  color: var(--fg);
+}
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--fg-subtle);
+}
+.meta {
+  color: var(--fg-subtle);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+.empty {
+  padding: var(--space-5);
+  color: var(--fg-subtle);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.97);
+  }
+}
