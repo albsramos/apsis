@@ -60,7 +60,8 @@ void main() {
   vec3 v = normalize(cameraPosition - vPosW);
   // Light: a wide, soft falloff from the sunward side into shadow. It reaches a little past the terminator,
   // so the sphere darkens gradually instead of being cut in two.
-  float lit = pow(smoothstep(-0.3, 1.0, dot(n, sunDir)), 1.4);
+  float sun = dot(n, sunDir);
+  float lit = pow(smoothstep(-0.3, 1.0, sun), 1.4);
 
   float lon = vUv.x * 360.0 - 180.0;
   float lat = vUv.y * 180.0 - 90.0;
@@ -82,10 +83,12 @@ void main() {
   vec3 sea = mix(uShade, uOcean, lit);
 
   // Land dots take the same light, staying a faint outline in the shadow. Where there is activity the dot
-  // itself lights up: a little in daylight, more in the dark, where it is the only thing to see.
+  // itself lights up, as lights do: all but invisible in daylight, coming on through the dusk and shining
+  // on the night side, where the brightest push past white into the bloom.
   vec3 dotCol = mix(uShade, uLand, 0.16 + 0.84 * lit);
-  float glow = smoothstep(0.04, 1.0, act) * (1.0 - 0.6 * lit);
-  dotCol = mix(dotCol, uActive, glow * 0.8);
+  float night = 1.0 - smoothstep(-0.28, 0.16, sun);
+  float glow = smoothstep(0.04, 0.9, act) * mix(0.05, 1.0, night);
+  dotCol = mix(dotCol, uActive, glow) + uActive * glow * glow * night * 0.5;
   vec3 col3 = mix(sea, mix(sea, dotCol, uDim), dotMask);
 
   // Limb: a soft rim of light on the sunward edge, gone in the shadow
