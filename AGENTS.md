@@ -20,12 +20,14 @@ src/
     layout/        App chrome (AppShell, TopBar, Timeline, SidePanel, CommandPalette)
     sheet/         Left-sheet content (FleetSheet, ClusterSheet and their sections)
     scene/         Everything inside the <Canvas> (Earth, OrbitRing, ClusterMarker, ClusterModel, CameraRig…)
-  sim/             The simulation: orbits, thermal model, faults. Pure TS, no React, no three.js. Runs in a worker.
+  sim/             The simulation: orbits, thermal model, faults, and each cluster's physical design (design.ts).
+                   Pure TS, no React, no three.js. Runs in a worker.
   store/           zustand store, the sim clock, the worker bridge
   lib/             Hooks and helpers with no UI (format, heat ramp, palette, textures, hotkeys)
   styles/          tokens.css and global.css only
 public/textures/   Earth maps, bundled (nothing is fetched from another origin)
 scripts/           sim-check.ts (npm run sim:check)
+docs/              The engineering drawing the cluster model is built to (halyard-general-arrangement.pdf)
 ```
 
 ## Always
@@ -48,6 +50,8 @@ scripts/           sim-check.ts (npm run sim:check)
 3. **Lenses are material parameters**, lerped per frame, never separate meshes.
 4. **Physics first.** A new fault comes from the model in `sim/cluster.ts` and is described in `sim/faults.ts`; the UI
    never invents state. Keep `npm run sim:check` green, and add a check for any new story the UI relies on.
+5. **The cluster model is to scale.** Its dimensions and flight attitude come from `sim/design.ts` and `sim/orbit.ts`,
+   in metres, and match the drawing in `docs/`. Change a size there, never in a component.
 
 ## Before committing
 

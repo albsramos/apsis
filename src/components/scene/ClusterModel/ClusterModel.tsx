@@ -11,20 +11,8 @@ import { MODULE_SCALE, RADIATOR_SCALE } from '@/lib/heat'
 import { radiatorTexture, solarTexture } from '@/lib/textures'
 import { fmt } from '@/lib/format'
 import { partName, samePart } from '@/lib/parts'
-import {
-  clusterPose,
-  DISH_X,
-  MODEL_SCALE,
-  modulePos,
-  partLocal,
-  RADIATOR_X,
-  SEGMENT,
-  segmentZ,
-  TRUSS,
-  WING,
-  WING_X,
-  wingZ,
-} from './layout'
+import { BUS, designOf, DISH_RADIUS, HUB, MAST_RADIUS, MODULE, PUMP_PACKAGE, TRUSS } from '@/sim/design'
+import { clusterPose, dishMount, MODEL_SCALE, modulePos, partLocal, segmentZ, wingZ } from './layout'
 import styles from './ClusterModel.module.css'
 
 const flowVert = /* glsl */ `
@@ -63,8 +51,10 @@ void main() {
 `
 
 const rad = (d: number) => (d * Math.PI) / 180
-/** Length of the radiator boom, tip to tip */
-const BOOM = 2 * (SEGMENT.offset + 4 * (SEGMENT.length + SEGMENT.gap))
+/** Coolant, data and power lines run just outside the truss, drawn about three times their true bore so they read. */
+const LINE_Z = TRUSS.section / 2 + 0.2
+/** The dish is a cap of this sphere, 0.9 rad wide */
+const DISH_SPHERE = DISH_RADIUS / Math.sin(0.9)
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
   return t * t * (3 - 2 * t)
@@ -73,12 +63,14 @@ const smooth = (a: number, b: number, x: number) => {
 type PartMat = { part: PartRef; mat: MeshStandardMaterial; base: Color }
 
 /**
- * The cluster up close: a truss of compute modules, two sun-tracking solar wings and two radiators
- * held edge-on to the Sun. It grows out of the marker as the camera arrives (wings and radiators
- * unfold last). The lens drives every material: heat, throughput, or faults.
+ * The cluster up close, to scale, as dimensioned in sim/design.ts (and drawn in docs/): a truss carrying six
+ * small compute modules, a thermal control package aft and the bus forward, two sun-tracking solar wings and
+ * two radiators held edge-on to the Sun. It grows out of the marker as the camera arrives (wings and
+ * radiators unfold last). The lens drives every material: heat, throughput, or faults.
  */
 export function ClusterModel({ id }: { id: string }) {
   const cluster = clusterById(id)!
+  const d = designOf(cluster)
   const root = useRef<Group>(null)
   const wings = useRef<(Group | null)[]>([])
   const radiators = useRef<(Group | null)[]>([])
@@ -116,6 +108,7 @@ export function ClusterModel({ id }: { id: string }) {
         part({ kind: 'wing', index: w }, new MeshStandardMaterial({ color: '#ffffff', map: solar, metalness: 0.4, roughness: 0.35 })),
       ),
       dish: part({ kind: 'dish' }, hull('#f4f4f5', 0.6, 0.3)),
+      pumps: part({ kind: 'loop' }, hull('#d4d4d8', 0.6, 0.35)),
       // Coolant, cool (pale) at the radiators to warm (blue) at the modules; one material per pipe length so
       // the pulse spacing looks the same on every pipe.
       coolant: flow(p['heat-2'], p['viz-active'], 9),
@@ -138,7 +131,7 @@ export function ClusterModel({ id }: { id: string }) {
     const g = root.current
     if (!g) return
     const t = clock.view()
-    clusterPose(cluster.orbit, t, g.position, g.quaternion)
+    clusterPose(cluster, t, g.position, g.quaternion)
 
     const dist = state.camera.position.distanceTo(g.position)
     const f = smooth(0.62, 0.16, dist)
@@ -182,6 +175,8 @@ export function ClusterModel({ id }: { id: string }) {
       if (thermal) addScaled(tmp.e, thermal, wT)
       if (output) addScaled(tmp.e, output, wO)
       if (sev) addScaled(tmp.e, severityColor(sev), wF * (sev === 'info' ? 0.45 : pulse) * 0.9)
+      // To scale, a faulted part can be a small thing on a big structure: keep the rest faintly lit around it.
+      else addScaled(tmp.e, p['fg-subtle'], wF * 0.4)
       if (samePart(pm.part, hover) || samePart(pm.part, picked)) tmp.e.addScalar(samePart(pm.part, picked) ? 0.22 : 0.14)
       pm.mat.emissive.lerp(tmp.e, k)
       tmp.c.copy(pm.base).lerp(dark, Math.min(1, wF * (sev ? 0.4 : 0.85) + (wT + wO) * 0.9))
@@ -209,7 +204,10 @@ export function ClusterModel({ id }: { id: string }) {
       pu.uIntensity.value = wO * gen
     })
     apply(mats.dish, p['fg-subtle'].clone().multiplyScalar(0.35), p['viz-active'].clone().multiplyScalar(0.5 + 0.8 * s.util))
+    apply(mats.pumps, heatColor(s.loopC, RADIATOR_SCALE, new Color()).multiplyScalar(0.55), p['fg-subtle'].clone().multiplyScalar(0.22))
     mats.truss.color.lerp(tmp.c.set('#a1a1aa').lerp(dark, Math.min(1, wF * 0.85 + (wT + wO) * 0.75)), k)
+    // The structure keeps a faint glow of its own, so its lines do not vanish in Earth's shadow.
+    mats.truss.emissive.copy(p['fg-subtle']).multiplyScalar(0.22 + 0.18 * wF)
     mats.truss.wireframe = true
 
     const pumpFault = faults.get('loop')
@@ -256,99 +254,143 @@ export function ClusterModel({ id }: { id: string }) {
     },
   })
 
+  const dish = dishMount(d)
+  const blanket = d.wing.chord / 2 - MAST_RADIUS
+  const stub = MODULE.standoff + 0.6
+  const coolant = { from: PUMP_PACKAGE.x + PUMP_PACKAGE.length / 2, to: MODULE.x0 + 5 * MODULE.pitch }
+  const data = { from: MODULE.x0, to: BUS.x - BUS.length / 2 }
+
   return (
     <group ref={root} visible={false}>
-      {/* Truss */}
-      <mesh material={mats.truss} position={[(TRUSS.x0 + TRUSS.x1) / 2, 0, 0]}>
-        <boxGeometry args={[TRUSS.length, 0.07, 0.07]} />
+      {/* Truss, with the thermal control package (pumps) aft and the bus module forward */}
+      <mesh material={mats.truss}>
+        <boxGeometry args={[TRUSS.length, TRUSS.section, TRUSS.section, TRUSS.bays, 1, 1]} />
       </mesh>
-      {/* Coolant and data lines along the truss */}
-      {/* Main coolant line (flows from the radiators towards the modules), a branch to each module */}
-      <mesh material={mats.coolant} position={[-0.2, 0, 0.065]} rotation={[0, 0, -Math.PI / 2]} {...handlers({ kind: 'loop' })}>
-        <cylinderGeometry args={[0.02, 0.02, 1.6, 12, 1, true]} />
+      <mesh material={mats.pumps.mat} position={[PUMP_PACKAGE.x, 0, 0]} {...handlers({ kind: 'loop' })}>
+        <boxGeometry args={[PUMP_PACKAGE.length, PUMP_PACKAGE.section, PUMP_PACKAGE.section]} />
       </mesh>
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const [x, y] = modulePos(i)
-        return (
-          <mesh key={i} material={mats.branch} position={[x, y / 2, 0.065]} rotation={[y > 0 ? 0 : Math.PI, 0, 0]} raycast={() => null}>
-            <cylinderGeometry args={[0.012, 0.012, Math.abs(y), 8, 1, true]} />
-          </mesh>
-        )
-      })}
-      {/* Data line: from the modules (branches) along the truss to the dish */}
-      <mesh material={mats.data} position={[0.25, 0, -0.065]} rotation={[0, 0, -Math.PI / 2]} raycast={() => null}>
-        <cylinderGeometry args={[0.016, 0.016, 1.9, 10, 1, true]} />
-      </mesh>
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const [x, y] = modulePos(i)
-        return (
-          <mesh key={`d${i}`} material={mats.dataBranch} position={[x, y / 2, -0.065]} rotation={[y > 0 ? Math.PI : 0, 0, 0]} raycast={() => null}>
-            <cylinderGeometry args={[0.01, 0.01, Math.abs(y), 8, 1, true]} />
-          </mesh>
-        )
-      })}
-
-      {/* Compute modules */}
-      {mats.modules.map((pm, i) => (
-        <mesh key={i} material={pm.mat} position={modulePos(i)} {...handlers(pm.part)}>
-          <capsuleGeometry args={[0.085, 0.17, 3, 10]} />
+      {[0.6, -0.6].map((z) => (
+        <mesh key={z} material={mats.truss} position={[PUMP_PACKAGE.x - PUMP_PACKAGE.length / 2 - 0.2, 0, z]} rotation={[0, 0, Math.PI / 2]} raycast={() => null}>
+          <cylinderGeometry args={[0.3, 0.15, 0.4, 8, 1, true]} />
         </mesh>
       ))}
-
-      {/* Solar wings, on a boom across the truss */}
-      <mesh material={mats.truss} position={[WING_X, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.018, 0.018, 2 * (WING.offset + WING.length), 8]} />
+      <mesh material={mats.dish.mat} position={[BUS.x, 0, 0]} {...handlers({ kind: 'dish' })}>
+        <boxGeometry args={[BUS.length, BUS.section, BUS.section]} />
       </mesh>
+
+      {/* Main coolant line (flows from the radiators towards the modules), a branch to each module */}
+      <mesh material={mats.coolant} position={[(coolant.from + coolant.to) / 2, 0, LINE_Z]} rotation={[0, 0, -Math.PI / 2]} {...handlers({ kind: 'loop' })}>
+        <cylinderGeometry args={[0.22, 0.22, coolant.to - coolant.from, 12, 1, true]} />
+      </mesh>
+      {/* Data line: from the modules (branches) along the truss to the bus */}
+      <mesh material={mats.data} position={[(data.from + data.to) / 2, 0, -LINE_Z]} rotation={[0, 0, -Math.PI / 2]} raycast={() => null}>
+        <cylinderGeometry args={[0.18, 0.18, data.to - data.from, 10, 1, true]} />
+      </mesh>
+
+      {/* Compute modules: canisters standing off the truss on alternate sides */}
+      {mats.modules.map((pm, i) => {
+        const [x, y] = modulePos(d, i)
+        const side = Math.sign(y)
+        const collar = MODULE.standoff - TRUSS.section / 2
+        return (
+          <group key={i} position={[x, 0, 0]}>
+            <mesh material={mats.truss} position={[0, side * (TRUSS.section / 2 + collar / 2), 0]} raycast={() => null}>
+              <cylinderGeometry args={[0.5, 0.5, collar, 8, 1, true]} />
+            </mesh>
+            <mesh material={pm.mat} position={[0, y, 0]} raycast={() => null}>
+              <capsuleGeometry args={[MODULE.radius, MODULE.length - 2 * MODULE.radius, 4, 12]} />
+            </mesh>
+            {/* To scale a module is small, so it gets a generous invisible target */}
+            <mesh position={[0, y, 0]} {...handlers(pm.part)}>
+              <capsuleGeometry args={[MODULE.radius * 1.7, MODULE.length - 2 * MODULE.radius, 2, 8]} />
+              <meshBasicMaterial visible={false} />
+            </mesh>
+            <mesh material={mats.branch} position={[0, (side * stub) / 2, LINE_Z]} rotation={[side > 0 ? 0 : Math.PI, 0, 0]} raycast={() => null}>
+              <cylinderGeometry args={[0.14, 0.14, stub, 8, 1, true]} />
+            </mesh>
+            <mesh material={mats.dataBranch} position={[0, (side * stub) / 2, -LINE_Z]} rotation={[side > 0 ? Math.PI : 0, 0, 0]} raycast={() => null}>
+              <cylinderGeometry args={[0.12, 0.12, stub, 8, 1, true]} />
+            </mesh>
+          </group>
+        )
+      })}
+
+      {/* Solar wings: two blankets either side of a mast, turning about it to face the Sun */}
+      <mesh material={mats.truss} position={[HUB.wingX, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[MAST_RADIUS, MAST_RADIUS, d.height, 8, 8]} />
+      </mesh>
+      {[1, -1].map((side) => (
+        <mesh key={`wd${side}`} material={mats.truss} position={[HUB.wingX, 0, side * (TRUSS.section / 2 + 0.45)]} raycast={() => null}>
+          <boxGeometry args={[1.2, 1.2, 0.9]} />
+        </mesh>
+      ))}
       {/* Power from each wing tip in to the truss */}
       {[0, 1].map((w) => (
-        <mesh key={`p${w}`} material={mats.power[w]} position={[WING_X, 0, (w === 0 ? 1 : -1) * (WING.offset + WING.length) / 2]} rotation={[w === 0 ? -Math.PI / 2 : Math.PI / 2, 0, 0]} raycast={() => null}>
-          <cylinderGeometry args={[0.013, 0.013, WING.offset + WING.length, 8, 1, true]} />
+        <mesh key={`p${w}`} material={mats.power[w]} position={[HUB.wingX, 0, ((w === 0 ? 1 : -1) * d.height) / 4]} rotation={[w === 0 ? -Math.PI / 2 : Math.PI / 2, 0, 0]} raycast={() => null}>
+          <cylinderGeometry args={[0.18, 0.18, d.height / 2, 8, 1, true]} />
         </mesh>
       ))}
       {mats.wings.map((pm, w) => (
-        <group key={w} position={[WING_X, 0, 0]} ref={(el) => void (wings.current[w] = el)}>
-          <mesh material={pm.mat} position={[0, 0, wingZ(w)]} {...handlers(pm.part)}>
-            <boxGeometry args={[0.012, WING.width, WING.length, 1, 3, 8]} />
-          </mesh>
+        <group key={w} position={[HUB.wingX, 0, 0]} ref={(el) => void (wings.current[w] = el)}>
+          {[1, -1].map((side) => (
+            <mesh key={side} material={pm.mat} position={[0, side * (MAST_RADIUS + blanket / 2), wingZ(d, w)]} {...handlers(pm.part)}>
+              <boxGeometry args={[0.08, blanket, d.wing.length, 1, 2, Math.round(d.wing.length / 4)]} />
+            </mesh>
+          ))}
+          {[d.wing.root, d.wing.root + d.wing.length].map((z) => (
+            <mesh key={z} material={mats.truss} position={[0, 0, (w === 0 ? 1 : -1) * z]} raycast={() => null}>
+              <boxGeometry args={[0.2, d.wing.chord, 0.2]} />
+            </mesh>
+          ))}
         </group>
       ))}
 
-      {/* Radiators, four segments each */}
-      <mesh material={mats.truss} position={[RADIATOR_X, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, BOOM, 8]} />
+      {/* Radiators, four segments each, on a boom that carries the coolant out and back */}
+      <mesh material={mats.truss} position={[HUB.radiatorX, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.2, 0.2, 2 * d.boom, 8, 8]} />
       </mesh>
-      {[0, 1].map((r) => (
-        <mesh key={`boom-${r}`} material={mats.boom} position={[RADIATOR_X, 0, (r === 0 ? 1 : -1) * BOOM / 4]} rotation={[r === 0 ? Math.PI / 2 : -Math.PI / 2, 0, 0]} raycast={() => null}>
-          <cylinderGeometry args={[0.012, 0.012, BOOM / 2, 8, 1, true]} />
+      {[1, -1].map((side) => (
+        <mesh key={`rj${side}`} material={mats.truss} position={[HUB.radiatorX, 0, side * (TRUSS.section / 2 + 0.45)]} raycast={() => null}>
+          <boxGeometry args={[1, 1, 0.9]} />
         </mesh>
       ))}
       {[0, 1].map((r) => (
-        <group key={r} position={[RADIATOR_X, 0, 0]} ref={(el) => void (radiators.current[r] = el)}>
+        <mesh key={`boom-${r}`} material={mats.boom} position={[HUB.radiatorX, 0, ((r === 0 ? 1 : -1) * d.boom) / 2]} rotation={[r === 0 ? Math.PI / 2 : -Math.PI / 2, 0, 0]} raycast={() => null}>
+          <cylinderGeometry args={[0.15, 0.15, d.boom, 8, 1, true]} />
+        </mesh>
+      ))}
+      {[0, 1].map((r) => (
+        <group key={r} position={[HUB.radiatorX, 0, 0]} ref={(el) => void (radiators.current[r] = el)}>
           {mats.segments.slice(r * 4, r * 4 + 4).map((pm, s) => (
-            <group key={s} position={[0, 0, segmentZ(r * 4 + s)]}>
+            <group key={s} position={[0, 0, segmentZ(d, r * 4 + s)]}>
               <mesh material={pm.mat} {...handlers(pm.part)}>
-                <boxGeometry args={[0.012, SEGMENT.width, SEGMENT.length, 1, 6, 4]} />
+                <boxGeometry args={[0.1, d.segment.chord, d.segment.span, 1, 6, 4]} />
               </mesh>
               {/* Coolant crossing the panel */}
               <mesh material={mats.segPipes[r * 4 + s]} raycast={() => null}>
-                <cylinderGeometry args={[0.01, 0.01, SEGMENT.width * 0.96, 6, 1, true]} />
+                <cylinderGeometry args={[0.12, 0.12, d.segment.chord * 0.96, 6, 1, true]} />
               </mesh>
             </group>
           ))}
         </group>
       ))}
 
-      {/* Comms dish, pointing at the ground */}
-      <group position={[DISH_X, 0, 0]} {...handlers({ kind: 'dish' })}>
-        <mesh material={mats.truss} position={[0, -0.06, 0]}>
-          <cylinderGeometry args={[0.012, 0.012, 0.12, 6]} />
+      {/* Ground-link dish on its gimbal, pointing at the ground (in a tower, on an arm off the bus's shaded side) */}
+      {d.attitude === 'tower' && (
+        <mesh material={mats.truss} position={[BUS.x, -d.sunSide * (BUS.section / 2 + 0.8), dish.position[2]]} raycast={() => null}>
+          <boxGeometry args={[0.2, 1.6, 0.2]} />
         </mesh>
-        <mesh material={mats.dish.mat} position={[0, -0.15, 0]} rotation={[Math.PI, 0, 0]}>
-          <sphereGeometry args={[0.13, 16, 5, 0, Math.PI * 2, 0, 0.9]} />
+      )}
+      <group position={dish.position} rotation={[dish.tilt, 0, 0]} {...handlers({ kind: 'dish' })}>
+        <mesh material={mats.truss} position={[0, -0.3, 0]}>
+          <cylinderGeometry args={[0.1, 0.1, 0.6, 6]} />
+        </mesh>
+        <mesh material={mats.dish.mat} position={[0, -0.6 - DISH_SPHERE, 0]}>
+          <sphereGeometry args={[DISH_SPHERE, 16, 5, 0, Math.PI * 2, 0, 0.9]} />
         </mesh>
         {/* Downlink beam towards the ground (Output lens) */}
-        <mesh material={mats.downlink} position={[0, -0.2 - 0.6, 0]} rotation={[Math.PI, 0, 0]} raycast={() => null}>
-          <cylinderGeometry args={[0.32, 0.03, 1.2, 24, 1, true]} />
+        <mesh material={mats.downlink} position={[0, -1.2 - 7, 0]} rotation={[Math.PI, 0, 0]} raycast={() => null}>
+          <cylinderGeometry args={[4, 0.4, 14, 24, 1, true]} />
         </mesh>
       </group>
 
@@ -377,10 +419,10 @@ function PartTooltip({ clusterId }: { clusterId: string }) {
   const hover = useApsis((s) => (s.hoverPart?.clusterId === clusterId ? s.hoverPart.part : null))
   const s = useTelemetry(clusterId)
   if (!hover || !s) return null
-  const pos = partLocal(hover)
+  const pos = partLocal(hover, designOf(clusterById(clusterId)!))
   const fault = s.faults.find((f) => samePart(f.part, hover))
   return (
-    <Html position={[pos.x, pos.y + 0.25, pos.z]} center zIndexRange={[20, 10]} style={{ pointerEvents: 'none' }}>
+    <Html position={[pos.x, pos.y, pos.z]} center zIndexRange={[20, 10]} style={{ pointerEvents: 'none' }}>
       <div className={styles.tip}>
         <div className={styles.tipTitle}>{partName(hover)}</div>
         <div className={styles.tipRow}>{partDetail(hover, s)}</div>

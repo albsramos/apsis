@@ -7,11 +7,9 @@ import { orbitFrame } from '@/sim/orbit'
 import type { ClusterConfig } from '@/sim/types'
 import { clock, useApsis } from '@/store'
 import { REDUCED_MOTION, useMediaQuery } from '@/lib/useMediaQuery'
-import { chaseOffset, clusterPose, partWorld } from '../ClusterModel/layout'
+import { chaseOffset, clusterPose, focusDistance, partDistance, partWorld } from '../ClusterModel/layout'
 
 export const OVERVIEW_DISTANCE = 6.2
-const FOCUS_DISTANCE = 0.085
-const PART_DISTANCE = 0.042
 /** The camera never dips closer to the Earth's centre than this during a flight. */
 const MIN_RADIUS = 1.12
 
@@ -87,9 +85,10 @@ export function CameraRig() {
 
     // Where the focused view wants to be right now.
     if (c) {
-      if (part) partWorld(c.orbit, t, part, v.anchor)
-      else clusterPose(c.orbit, t, v.anchor, v.q)
-      chaseOffset(c.orbit, t, part ? PART_DISTANCE : FOCUS_DISTANCE, v.off)
+      if (part) partWorld(c, t, part, v.anchor)
+      else clusterPose(c, t, v.anchor, v.q)
+      // The whole cluster in view, or close enough to one part to see it: both depend on how big this cluster is.
+      chaseOffset(c, t, part ? partDistance(c, part) : focusDistance(c), v.off)
     } else {
       v.anchor.set(0, 0, 0)
     }
@@ -157,7 +156,7 @@ export function CameraRig() {
       rig.hasLast = true
     }
 
-    controls.minDistance = c ? 0.02 : 1.6
+    controls.minDistance = c ? 0.004 : 1.6
     controls.maxDistance = c ? 0.9 : 14
     controls.rotateSpeed = c ? 0.6 : 0.45
   })
@@ -173,7 +172,7 @@ const tmpQ = new Quaternion()
 const tmpP = new Vector3()
 
 function poseRadius(c: ClusterConfig, t: number, unit?: Vector3) {
-  clusterPose(c.orbit, t, tmpP, tmpQ)
+  clusterPose(c, t, tmpP, tmpQ)
   const r = tmpP.length()
   if (unit) unit.copy(tmpP).divideScalar(r)
   return r

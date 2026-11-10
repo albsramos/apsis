@@ -4,7 +4,9 @@
  * radiation upsets cluster in the South Atlantic Anomaly.
  */
 import { Engine } from '../src/sim/engine'
-import { SIM } from '../src/sim/fleet'
+import { designOf, radiatingAreaM2 } from '../src/sim/design'
+import { clusterById, FLEET, SIM } from '../src/sim/fleet'
+import { attitude, periodS, pointingLoss } from '../src/sim/orbit'
 
 const engine = new Engine()
 const hist = engine.advance(0)
@@ -53,5 +55,26 @@ check(saa.length > 0 && rate(saa) > 5 * rate(out), 'SEU rate is much higher insi
 
 const statuses = Object.fromEntries(Object.entries(engine.head()).map(([id, s]) => [id, s.status]))
 check(statuses['ko-5'] !== 'nominal' && statuses['ko-1'] === 'nominal', 'the fleet opens with a story: KO-5 in trouble, KO-1 calm')
+
+// The 3D model is drawn from the design; these are the facts it relies on.
+const near = (a: number, b: number, tol = 0.05) => Math.abs(a - b) <= tol
+const k1 = designOf(clusterById('ko-1')!)
+check(
+  near(k1.wing.chord, 19.5) && near(k1.wing.length, 48) && near(k1.segment.chord, 14) && near(k1.segment.span, 9.6) && near(k1.height, 106),
+  'KO-1 is built to the Halyard drawing: 19.5 × 48.0 m wings, 14.0 × 9.6 m radiator segments, 106 m tall',
+)
+check(
+  FLEET.every((c) => near(radiatingAreaM2(designOf(c)), c.radiatorAreaM2, 1)),
+  "every cluster's drawn radiators have the area its thermal model uses",
+)
+const worstLoss = (id: string) => {
+  const o = clusterById(id)!.orbit
+  return Math.max(...Array.from({ length: 120 }, (_, k) => pointingLoss(o, (k / 120) * periodS(o))))
+}
+check(
+  attitude(clusterById('ko-1')!.orbit) === 'tower' && attitude(clusterById('ko-2')!.orbit) === 'tower' && worstLoss('ko-1') < 0.02 && worstLoss('ko-2') < 0.02,
+  'dawn-dusk clusters fly as towers, their wings square to the Sun (under 2% pointing loss)',
+)
+check(attitude(clusterById('ko-3')!.orbit) === 'crosswise', 'KO-3, with the Sun near its orbit plane, flies with its booms across the orbit')
 
 process.exit(failed ? 1 : 0)

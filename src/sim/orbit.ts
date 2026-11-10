@@ -108,10 +108,38 @@ export function betaDeg(o: Orbit) {
   return deg(Math.asin(n[0] * SUN[0]))
 }
 
-/** Sun direction in the orbit's (along, zenith) plane, as an angle: what sun-tracking wings point at. */
+/**
+ * How a cluster flies. Its wings and radiators turn about one axis, their booms, so the booms must lie across
+ * the sunlight for the wings to face it.
+ *
+ * - crosswise: booms along the orbit normal. Right when the Sun is near the orbit plane (low beta); the wings
+ *   turn once an orbit.
+ * - tower: booms on the local vertical, the cluster rolled a quarter turn about its truss. Right when the Sun
+ *   is near the orbit normal (dawn-dusk orbits), where crosswise wings could only ever be edge-on to it.
+ */
+export type Attitude = 'crosswise' | 'tower'
+export const attitude = (o: Orbit): Attitude => (Math.abs(betaDeg(o)) >= 45 ? 'tower' : 'crosswise')
+
+/**
+ * The cluster's body axes in scene axes: x along the truss (along-track), z along the booms, y the axis the
+ * compute modules stand on. In a tower, +y is the orbit's angular momentum, so the Sun is on the +y side
+ * when beta is positive.
+ */
+export function bodyFrame(o: Orbit, t: number): { x: Vec3; y: Vec3; z: Vec3 } {
+  const { along, zenith, normal } = orbitFrame(o, t)
+  return attitude(o) === 'tower' ? { x: along, y: cross(zenith, along), z: zenith } : { x: along, y: zenith, z: normal }
+}
+
+/** Sun direction about the booms, as an angle from the truss: what the sun-tracking wing drives point at. */
 export function sunAngleDeg(o: Orbit, t: number) {
-  const { along, zenith } = orbitFrame(o, t)
-  return deg(Math.atan2(dot(SUN, zenith), dot(SUN, along)))
+  const { x, y } = bodyFrame(o, t)
+  return deg(Math.atan2(dot(SUN, y), dot(SUN, x)))
+}
+
+/** Share of sunlight a perfectly tracking wing still misses, because the Sun is not square to the booms. */
+export function pointingLoss(o: Orbit, t: number) {
+  const s = dot(SUN, bodyFrame(o, t).z)
+  return 1 - Math.sqrt(Math.max(0, 1 - s * s))
 }
 
 /** Footprint half-angle (deg) for a ground station seeing the cluster above `minElev`. */

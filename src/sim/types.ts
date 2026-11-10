@@ -87,7 +87,7 @@ export interface ClusterSample {
   seuTotal: number
   /** Solar wing tracking error, deg */
   wingErrDeg: number[]
-  /** Solar wing angle about the orbit normal, deg (what the 3D model shows) */
+  /** Solar wing angle about its boom, from the truss, deg (what the 3D model shows) */
   wingAngleDeg: number[]
   faults: Fault[]
   status: Status

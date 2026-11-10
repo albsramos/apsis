@@ -31,6 +31,19 @@ The simulation is deterministic and physics-driven, so what you see has a cause:
 - **KO-7 Deepwell**, lightly loaded cold storage, runs on heaters in shadow.
 - Everyone collects radiation upsets over the **South Atlantic Anomaly** (shown on the globe in the Faults lens).
 
+## The clusters are drawn to scale
+
+Each cluster's model is built in metres from an engineering design, not sketched. The design is drawn up for KO-1
+Halyard in **[docs/halyard-general-arrangement.pdf](docs/halyard-general-arrangement.pdf)**: three views, a section
+through a compute module, the coolant loop, and the sums behind the sizes. At 420 kW Halyard stands 106 m tall, and
+its six compute modules are 2.4 m canisters on a 30 m truss. Almost everything else is solar wing and radiator.
+
+The dimensions live in `src/sim/design.ts`. Every cluster shares Halyard's truss, modules and bus, with wings and
+radiators sized to its own power and heat. How a cluster flies depends on its orbit: where the Sun stays near the
+orbit plane the wing booms lie across the orbit and the wings turn once a revolution; in a dawn-dusk orbit the
+cluster rolls a quarter turn and stands its booms on the local vertical, so the wings can face a Sun that sits
+broadside. Only the coolant, data and power lines are exaggerated (about three times their bore) so their flow reads.
+
 ## Keys
 
 `⌘K` search · `1 2 3` lenses · `J / K` next / previous cluster · `F` follow · `Space` play / pause · `?` explain · `Esc` back

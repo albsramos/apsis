@@ -12,7 +12,8 @@
   color: var(--fg);
   font-size: var(--text-xs);
   white-space: nowrap;
-  transform: translateY(-100%);
+  /* Sits above the part it describes, whichever way the cluster is flying */
+  transform: translateY(calc(-100% - var(--space-5)));
 }
 .tipTitle {
   font-weight: 600;
