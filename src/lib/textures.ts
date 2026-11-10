@@ -31,7 +31,7 @@ export const glowTexture = () =>
 export const ringTexture = () =>
   make('ring', 128, (g, s) => {
     g.strokeStyle = 'white'
-    g.lineWidth = s * 0.035
+    g.lineWidth = s * 0.02
     g.beginPath()
     g.arc(s / 2, s / 2, s * 0.42, 0, Math.PI * 2)
     g.stroke()

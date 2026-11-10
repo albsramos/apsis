@@ -16,7 +16,7 @@ const EARTH = new Sphere(new Vector3(), 1)
 const ray = new Ray()
 const hit = new Vector3()
 
-/** A cluster at fleet scale: a glowing point, a pulse ring when something is wrong, and a label. */
+/** A cluster at fleet scale: a small glowing point, a faint pulse ring when something is wrong, and a label. */
 export function ClusterMarker({ cluster }: { cluster: ClusterConfig }) {
   const group = useRef<Group>(null)
   const core = useRef<Sprite>(null)
@@ -53,20 +53,22 @@ export function ClusterMarker({ cluster }: { cluster: ClusterConfig }) {
     const near = selected ? Math.min(1, Math.max(0, (dist - 0.12) / 0.5)) : 1
     const dim = st.selectedId && !selected ? 0.45 : 1
     const eclipse = s?.eclipse ? 0.55 : 1
-    const size = Math.min(0.12, Math.max(0.004, dist * 0.014)) * (hovered ? 1.5 : 1)
+    // Small on screen: a point of light, not a disc. It sits over a lit globe now, so it must not cover it.
+    const size = Math.min(0.085, Math.max(0.004, dist * 0.01)) * (hovered ? 1.5 : 1)
 
-    // A generous, constant-on-screen click target.
-    hitbox.current?.scale.setScalar(Math.max(0.012, size * 0.75))
+    // A generous, constant-on-screen click target, larger than the point it surrounds.
+    hitbox.current?.scale.setScalar(Math.min(0.09, Math.max(0.012, dist * 0.0105)) * (hovered ? 1.5 : 1))
     if (core.current) {
       core.current.scale.setScalar(size)
-      coreMat.color.copy(color).multiplyScalar(2.2 * eclipse)
+      coreMat.color.copy(color).multiplyScalar(2 * eclipse)
       coreMat.opacity = near * dim
     }
     if (halo.current) {
       const pulse = s && s.status !== 'nominal' ? (state.clock.elapsedTime * (s.status === 'critical' ? 1.1 : 0.6)) % 1 : 0
-      halo.current.scale.setScalar(size * (1 + pulse * 1.5))
-      haloMat.color.copy(color).multiplyScalar(1.2)
-      haloMat.opacity = s && s.status !== 'nominal' ? (1 - pulse) * 0.8 * near * dim : selected ? 0.8 * near : 0
+      // The pulse is a thin ring that opens a little way and fades: a quiet signal, not a target painted on the Earth.
+      halo.current.scale.setScalar(size * (1.1 + pulse * 0.9))
+      haloMat.color.copy(color)
+      haloMat.opacity = s && s.status !== 'nominal' ? (1 - pulse) * (1 - pulse) * 0.5 * near * dim : selected ? 0.5 * near : 0
     }
 
     // Hide the label when the cluster is behind the Earth.
