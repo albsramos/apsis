@@ -62,5 +62,7 @@ visit, and each deploy replaces the old cache. The manifest and icons live in `p
 
 Built with React 19, TypeScript, Vite, CSS Modules, three.js (@react-three/fiber, drei, postprocessing), zustand,
 Radix and cmdk. The UI uses Whetstone's design tokens. The globe is drawn as dots from a small land mask
-(`public/textures/land_mask_1024.png`, derived from the three.js example Earth maps); altitudes are drawn ×3 so the
+(`public/textures/land_mask_1024.png`, derived from the three.js example Earth maps) and shaded like GitHub's: an
+indigo sphere that falls off into shadow away from the sun, its dots lighting up where people are
+(`activity_1024.png`, a blurred night-lights map read once per dot, never drawn). Altitudes are drawn ×3 so the
 orbits read at a glance. Colour is reserved for meaning: red danger, yellow warning, green all good, blue neutral data.

@@ -62,11 +62,15 @@
 
   /* The scene's own colours */
   --space: #040406;
-  --atmosphere: #4f8cff;
-  --globe-ocean: #0a0d16;
-  --globe-land: #9fb4dc;
-  /* Night-side city lights: the warm sodium-gold of real night imagery. Earth imagery, not a UI state. */
-  --city-lights: #ffc77d;
+  /*
+   * The globe wears the tones of GitHub's: an indigo sphere (ocean) sinking to navy in the shadow (shade),
+   * periwinkle land dots that brighten to a pale blue-white where there is activity, and a violet-blue halo.
+   */
+  --atmosphere: #6f7cff;
+  --globe-ocean: #1d2670;
+  --globe-shade: #04061a;
+  --globe-land: #5a69dc;
+  --globe-active: #cdd8ff;
   --saa: #93c5fd;
 }
 

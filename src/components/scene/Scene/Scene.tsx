@@ -23,7 +23,7 @@ export function Scene() {
       <Canvas
         dpr={[1, dpr]}
         gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }}
-        camera={{ fov: 42, near: 0.002, far: 400, position: [OVERVIEW_DISTANCE * 0.52, OVERVIEW_DISTANCE * 0.3, OVERVIEW_DISTANCE * 0.8] }}
+        camera={{ fov: 42, near: 0.002, far: 400, position: [OVERVIEW_DISTANCE * 0.52, OVERVIEW_DISTANCE * 0.3, OVERVIEW_DISTANCE * -0.8] }}
         onCreated={({ gl }) => gl.setClearColor(getComputedStyle(document.documentElement).getPropertyValue('--space').trim() || '#050507')}
       >
         <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.75)} />

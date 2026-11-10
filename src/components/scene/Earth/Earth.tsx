@@ -12,18 +12,21 @@ const SUN = new Vector3(1, 0, 0)
 const DOT_STEP = 1.1
 
 /**
- * The Earth as a dotted globe, with a thin atmosphere rim. It is a backdrop: the orbits and clusters are
- * the subject. In the Faults lens the South Atlantic Anomaly appears on it. `children` sit in the Earth's
+ * The Earth as a dotted globe in the manner of GitHub's: an indigo sphere shaded from light into shadow, land
+ * as dots that light up where people are, and a halo on the sunward limb. It is a backdrop: the orbits and
+ * clusters are the subject. In the Faults lens the South Atlantic Anomaly appears on it. `children` sit in the Earth's
  * rotating frame (ground tracks, ground stations).
  */
 export function Earth({ children }: { children?: ReactNode }) {
-  const [land, city] = useTexture([
+  const [land, activity] = useTexture([
     `${import.meta.env.BASE_URL}textures/land_mask_1024.png`,
-    `${import.meta.env.BASE_URL}textures/city_lights_2048.png`,
+    `${import.meta.env.BASE_URL}textures/activity_1024.png`,
   ])
-  land.minFilter = LinearFilter
-  land.generateMipmaps = false
-  city.anisotropy = 8
+  // Both maps are data, looked up once per dot at its centre; neither is drawn on the globe.
+  for (const t of [land, activity]) {
+    t.minFilter = LinearFilter
+    t.generateMipmaps = false
+  }
 
   const group = useRef<Group>(null)
   const p = palette()
@@ -35,11 +38,12 @@ export function Earth({ children }: { children?: ReactNode }) {
         fragmentShader: earthFrag,
         uniforms: {
           landMap: { value: land },
-          cityMap: { value: city },
-          uCity: { value: p['city-lights'] },
+          activityMap: { value: activity },
           sunDir: { value: SUN },
           uOcean: { value: p['globe-ocean'] },
+          uShade: { value: p['globe-shade'] },
           uLand: { value: p['globe-land'] },
+          uActive: { value: p['globe-active'] },
           uAtmos: { value: p.atmosphere },
           uSaa: { value: 0 },
           uSaaCenter: { value: [SAA.lon, SAA.lat] },
@@ -51,7 +55,7 @@ export function Earth({ children }: { children?: ReactNode }) {
           uDim: { value: 1 },
         },
       }),
-    [land, city, p],
+    [land, activity, p],
   )
 
   const atmosMat = useMemo(
