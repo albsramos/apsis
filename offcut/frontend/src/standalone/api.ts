@@ -42,6 +42,7 @@ type Db = { projects: StoredProject[]; settings: Omit<Settings, 'defaultModel'> 
 const now = () => new Date().toISOString();
 const uid = () => crypto.randomUUID();
 const exampleSpec = () => structuredClone(example) as Spec;
+const EXAMPLE_NAME = 'Bedside table (example)';
 
 function seed(): Db {
   const t = now();
@@ -51,7 +52,7 @@ function seed(): Db {
     projects: [
       {
         id: uid(),
-        name: 'Bedside table (example)',
+        name: EXAMPLE_NAME,
         status: 'ready',
         error: '',
         reference: { label: 'Top width', mm: 450 },
@@ -75,6 +76,11 @@ function load(): Db {
       // An analysis can't survive a reload; the Go server fails interrupted runs the same way.
       for (const p of db.projects) {
         if (p.status === 'analyzing') Object.assign(p, { status: 'failed', error: 'The page was reloaded during the analysis.' });
+        // Keep the seeded example up to date with the app, unless it was edited.
+        if (p.name === EXAMPLE_NAME && p.specs.length === 1 && p.specs[0]!.source === 'ai') {
+          const spec = exampleSpec();
+          p.specs[0] = { ...p.specs[0]!, spec, issues: validate(spec) };
+        }
       }
       return db;
     }
