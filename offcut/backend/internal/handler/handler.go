@@ -15,6 +15,7 @@ import (
 	"offcut/internal/domain"
 	"offcut/internal/llm/anthropic"
 	"offcut/internal/service"
+	"offcut/internal/spec"
 )
 
 type Handler struct{ svc *service.Service }
@@ -323,7 +324,7 @@ func (h *Handler) validateSpec(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, ValidateResponse{Issues: nonNil(issues)})
+	writeJSON(w, http.StatusOK, ValidateResponse{Issues: nonNil(issues), Fixings: nonNil(spec.Fixings(req.Spec))})
 }
 
 // getSettings godoc

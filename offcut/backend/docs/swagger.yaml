@@ -82,10 +82,69 @@ definitions:
     required:
     - error
     type: object
+  Fastener:
+    properties:
+      start:
+        $ref: '#/definitions/Vec3'
+      tip:
+        $ref: '#/definitions/Vec3'
+    required:
+    - start
+    - tip
+    type: object
+  Fixing:
+    properties:
+      axis:
+        type: string
+      direction:
+        type: integer
+      endDistance:
+        description: EndDistance is how far the first and last fastener sit from the
+          ends of the joint.
+        type: number
+      fasteners:
+        items:
+          $ref: '#/definitions/Fastener'
+        type: array
+      hardware:
+        type: string
+      holes:
+        items:
+          $ref: '#/definitions/Hole'
+        type: array
+      into:
+        type: string
+      joint:
+        description: index into the spec's joints
+        type: integer
+      method:
+        $ref: '#/definitions/JointMethod'
+      through:
+        description: the part a screw or nail is driven through; for a dowel, the
+          first part
+        type: string
+    required:
+    - axis
+    - direction
+    - endDistance
+    - fasteners
+    - holes
+    - into
+    - joint
+    - method
+    - through
+    type: object
   Hardware:
     properties:
+      diameter:
+        description: |-
+          Diameter and Length, in mm, for screws, nails and dowels: the holes are
+          worked out from them.
+        type: number
       id:
         type: string
+      length:
+        type: number
       name:
         type: string
       notes:
@@ -107,6 +166,59 @@ definitions:
     - id
     - quantity
     type: object
+  Hole:
+    properties:
+      at:
+        allOf:
+        - $ref: '#/definitions/Vec3'
+        description: where the drill goes in, on the part's surface
+      axis:
+        description: 'x, y or z: the drilling direction'
+        type: string
+      countersink:
+        type: boolean
+      depth:
+        type: number
+      diameter:
+        type: number
+      direction:
+        description: +1 or -1 along that axis
+        type: integer
+      kind:
+        $ref: '#/definitions/HoleKind'
+      part:
+        type: string
+      through:
+        type: boolean
+    required:
+    - at
+    - axis
+    - countersink
+    - depth
+    - diameter
+    - direction
+    - kind
+    - part
+    - through
+    type: object
+  HoleKind:
+    enum:
+    - clearance
+    - pilot
+    - dowel
+    type: string
+    x-enum-comments:
+      Clearance: through the first board, the screw's diameter
+      DowelHole: half of a dowel, in each board
+      Pilot: into the second board, for the thread
+    x-enum-descriptions:
+    - through the first board, the screw's diameter
+    - into the second board, for the thread
+    - half of a dowel, in each board
+    x-enum-varnames:
+    - Clearance
+    - Pilot
+    - DowelHole
   Issue:
     properties:
       code:
@@ -452,6 +564,12 @@ definitions:
     properties:
       createdAt:
         type: string
+      fixings:
+        description: 'Fixings are worked out from the spec: where every screw, nail
+          and dowel goes, and its holes.'
+        items:
+          $ref: '#/definitions/Fixing'
+        type: array
       issues:
         items:
           $ref: '#/definitions/Issue'
@@ -467,6 +585,7 @@ definitions:
         type: integer
     required:
     - createdAt
+    - fixings
     - issues
     - source
     - spec
@@ -539,11 +658,16 @@ definitions:
     type: object
   ValidateResponse:
     properties:
+      fixings:
+        items:
+          $ref: '#/definitions/Fixing'
+        type: array
       issues:
         items:
           $ref: '#/definitions/Issue'
         type: array
     required:
+    - fixings
     - issues
     type: object
   Vec3:

@@ -60,11 +60,13 @@ type Photo struct {
 } //@name Photo
 
 type SpecVersion struct {
-	Version   int          `json:"version"`
-	Source    string       `json:"source" enums:"ai,user"`
-	Spec      spec.Spec    `json:"spec"`
-	Issues    []spec.Issue `json:"issues"`
-	CreatedAt time.Time    `json:"createdAt"`
+	Version int          `json:"version"`
+	Source  string       `json:"source" enums:"ai,user"`
+	Spec    spec.Spec    `json:"spec"`
+	Issues  []spec.Issue `json:"issues"`
+	// Fixings are worked out from the spec: where every screw, nail and dowel goes, and its holes.
+	Fixings   []spec.Fixing `json:"fixings"`
+	CreatedAt time.Time     `json:"createdAt"`
 } //@name SpecVersion
 
 // ConversationEntry is a readable line of what was said to and by the AI.
@@ -108,7 +110,8 @@ type UpdateSpecRequest struct {
 } //@name UpdateSpecRequest
 
 type ValidateResponse struct {
-	Issues []spec.Issue `json:"issues"`
+	Issues  []spec.Issue  `json:"issues"`
+	Fixings []spec.Fixing `json:"fixings"`
 } //@name ValidateResponse
 
 type Settings struct {
@@ -188,7 +191,7 @@ func toProject(d service.ProjectDetail) Project {
 }
 
 func toSpecVersion(v domain.SpecVersion) SpecVersion {
-	return SpecVersion{Version: v.Version, Source: string(v.Source), Spec: v.Spec, Issues: nonNil(v.Issues), CreatedAt: v.CreatedAt}
+	return SpecVersion{Version: v.Version, Source: string(v.Source), Spec: v.Spec, Issues: nonNil(v.Issues), Fixings: nonNil(spec.Fixings(v.Spec)), CreatedAt: v.CreatedAt}
 }
 
 func toSettings(s service.SettingsView, defaultModel string) Settings {

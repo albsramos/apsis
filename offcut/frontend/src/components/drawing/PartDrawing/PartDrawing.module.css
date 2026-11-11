@@ -1,8 +1,13 @@
+.views {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .svg {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 180px;
 }
 
 .board {
@@ -10,4 +15,55 @@
   stroke: var(--draw-line);
   stroke-width: 1.4;
   vector-effect: non-scaling-stroke;
+}
+
+.title {
+  fill: var(--draw-line);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.measure {
+  fill: var(--draw-hidden);
+  font-family: var(--font-sans);
+}
+
+.ordinate line {
+  stroke: var(--draw-dimension);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.ordinate text {
+  fill: var(--draw-dimension);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.hole line {
+  stroke: var(--draw-line);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.through,
+.blind,
+.countersink {
+  stroke: var(--draw-line);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.through {
+  fill: var(--draw-face-front);
+}
+
+/* A blind hole (a pilot or a dowel hole) stops inside the board: filled. */
+.blind {
+  fill: var(--draw-line);
+}
+
+.countersink {
+  fill: none;
+  stroke-dasharray: 2 2;
 }

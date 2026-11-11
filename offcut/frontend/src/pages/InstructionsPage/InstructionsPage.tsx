@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, LayoutGrid, Printer, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
-import type { Spec } from '@/api';
+import type { Fixing, Spec } from '@/api';
 import { IsoDrawing } from '@/components/drawing';
 import { Button, Callout, Dialog, IconButton, Spinner } from '@/components/ui';
 import { fixingLines, labelParts, stepScene, type Labels } from '@/lib/drawing';
@@ -26,11 +26,11 @@ export function InstructionsPage() {
     );
   }
   const spec = project.data.spec.spec;
-  if (search.get('print') === '1') return <PrintAll spec={spec} name={project.data.name} />;
-  return <StepViewer projectId={id} name={project.data.name} spec={spec} index={Math.max(0, Number(step) - 1)} />;
+  if (search.get('print') === '1') return <PrintAll spec={spec} fixings={project.data.spec.fixings} name={project.data.name} />;
+  return <StepViewer projectId={id} name={project.data.name} spec={spec} fixings={project.data.spec.fixings} index={Math.max(0, Number(step) - 1)} />;
 }
 
-function StepViewer({ projectId, name, spec, index }: { projectId: string; name: string; spec: Spec; index: number }) {
+function StepViewer({ projectId, name, spec, fixings, index }: { projectId: string; name: string; spec: Spec; fixings: Fixing[]; index: number }) {
   const navigate = useNavigate();
   const [allOpen, setAllOpen] = useState(false);
   const labels = useMemo(() => labelParts(spec), [spec]);
@@ -94,7 +94,7 @@ function StepViewer({ projectId, name, spec, index }: { projectId: string; name:
       {done ? (
         <Finished spec={spec} labels={labels} projectId={projectId} onBack={() => go(total - 1)} />
       ) : (
-        <Step spec={spec} labels={labels} index={index} swipe={swipe} />
+        <Step spec={spec} fixings={fixings} labels={labels} index={index} swipe={swipe} />
       )}
 
       {!done && (
@@ -140,9 +140,9 @@ interface Swipe {
   onPointerUp: (e: React.PointerEvent) => void;
 }
 
-function Step({ spec, labels, index, swipe }: { spec: Spec; labels: Labels; index: number; swipe?: Swipe }) {
+function Step({ spec, fixings, labels, index, swipe }: { spec: Spec; fixings: Fixing[]; labels: Labels; index: number; swipe?: Swipe }) {
   const step = spec.steps[index]!;
-  const scene = stepScene(spec, index);
+  const scene = stepScene(spec, index, fixings);
   const letters = new Map([...labels.byPart].map(([id, g]) => [id, g.letter]));
   return (
     <div className={styles.step}>
@@ -167,12 +167,12 @@ function Step({ spec, labels, index, swipe }: { spec: Spec; labels: Labels; inde
           label={`Step ${index + 1}: ${step.title}. ${step.text}`}
         />
       </div>
-      <YouNeed spec={spec} labels={labels} index={index} />
+      <YouNeed spec={spec} fixings={fixings} labels={labels} index={index} />
     </div>
   );
 }
 
-function YouNeed({ spec, labels, index }: { spec: Spec; labels: Labels; index: number }) {
+function YouNeed({ spec, fixings, labels, index }: { spec: Spec; fixings: Fixing[]; labels: Labels; index: number }) {
   const step = spec.steps[index]!;
   const byLetter = new Map<string, { letter: string; name: string; n: number }>();
   for (const id of step.parts) {
@@ -183,7 +183,7 @@ function YouNeed({ spec, labels, index }: { spec: Spec; labels: Labels; index: n
     byLetter.set(g.letter, e);
   }
   const hw = new Map(spec.hardware.map((h) => [h.id, h]));
-  const how = fixingLines(spec, index, (id) => labels.byPart.get(id)?.letter ?? id);
+  const how = fixingLines(spec, fixings, index, (id) => labels.byPart.get(id)?.letter ?? id);
   if (byLetter.size === 0 && step.hardware.length === 0) return null;
   return (
     <aside className={styles.need} aria-label="You need">
@@ -244,7 +244,7 @@ function Finished({ spec, labels, projectId, onBack }: { spec: Spec; labels: Lab
   );
 }
 
-function PrintAll({ spec, name }: { spec: Spec; name: string }) {
+function PrintAll({ spec, fixings, name }: { spec: Spec; fixings: Fixing[]; name: string }) {
   const labels = useMemo(() => labelParts(spec), [spec]);
   useEffect(() => {
     const t = setTimeout(() => window.print(), 400);
@@ -255,7 +255,7 @@ function PrintAll({ spec, name }: { spec: Spec; name: string }) {
       <h1 className={styles.printTitle}>{name}</h1>
       {spec.steps.map((_, i) => (
         <section key={i} className={styles.printPage}>
-          <Step spec={spec} labels={labels} index={i} />
+          <Step spec={spec} fixings={fixings} labels={labels} index={i} />
         </section>
       ))}
     </div>

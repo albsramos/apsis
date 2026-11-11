@@ -16,6 +16,7 @@ import { ApiError, setPhotoUrl } from '@/api/fetcher';
 // The same bedside table the Go demo provider returns.
 // eslint-disable-next-line no-restricted-imports
 import example from '../../../backend/internal/spec/examples/bedside_table.json';
+import { fixings } from './fixings';
 import { validate } from './validate';
 
 const DEMO_DELAY_MS = 1500;
@@ -59,7 +60,7 @@ function seed(): Db {
         notes: '',
         asked: true,
         photos: [],
-        specs: [{ version: 1, source: 'ai', spec, issues: validate(spec), createdAt: t }],
+        specs: [{ version: 1, source: 'ai', spec, issues: validate(spec), fixings: [], createdAt: t }],
         conversation: [],
         createdAt: t,
         updatedAt: t,
@@ -123,6 +124,8 @@ function project(id: string): StoredProject {
   return p;
 }
 
+// Like the Go handler: fixings are worked out from the spec when it's read, not stored.
+const withFixings = (v: SpecVersion): SpecVersion => ({ ...v, fixings: fixings(v.spec) });
 const latest = (p: StoredProject) => p.specs.at(-1);
 
 const toPhoto = (ph: StoredPhoto): Photo => ({ id: ph.id, view: ph.view, url: ph.dataUrl, sent: ph.sent, createdAt: ph.createdAt });
@@ -137,7 +140,7 @@ function toProject(p: StoredProject): Project {
     notes: p.notes,
     ...(p.reference ? { reference: p.reference } : {}),
     ...(p.pending ? { pending: p.pending } : {}),
-    ...(spec ? { spec } : {}),
+    ...(spec ? { spec: withFixings(spec) } : {}),
     photos: p.photos.map(toPhoto),
     conversation: p.conversation,
     createdAt: p.createdAt,
@@ -236,7 +239,7 @@ function runDemo(id: string) {
     p.conversation.push({ role: 'assistant', text: message });
   } else {
     const spec = exampleSpec();
-    p.specs.push({ version: p.specs.length + 1, source: 'ai', spec, issues: validate(spec, db.settings.stockThicknesses), createdAt: now() });
+    p.specs.push({ version: p.specs.length + 1, source: 'ai', spec, issues: validate(spec, db.settings.stockThicknesses), fixings: [], createdAt: now() });
     p.status = 'ready';
     p.conversation.push({ role: 'assistant', text: "Here is the spec. I've designed the joinery, since it isn't visible." });
   }
@@ -305,10 +308,10 @@ const routes: Route[] = [
   ['PUT', /^\/projects\/([^/]+)\/spec$/, ([id], body) => {
     const p = project(id!);
     const spec = (body as { spec: Spec }).spec;
-    const v: SpecVersion = { version: p.specs.length + 1, source: 'user', spec, issues: validate(spec, db.settings.stockThicknesses), createdAt: now() };
+    const v: SpecVersion = { version: p.specs.length + 1, source: 'user', spec, issues: validate(spec, db.settings.stockThicknesses), fixings: [], createdAt: now() };
     p.specs.push(v);
     touch(p);
-    return v;
+    return withFixings(v);
   }],
   ['DELETE', /^\/photos\/([^/]+)$/, ([id]) => {
     const p = db.projects.find((x) => x.photos.some((ph) => ph.id === id));
@@ -317,7 +320,10 @@ const routes: Route[] = [
     p.photos = p.photos.filter((ph) => ph.id !== id);
     touch(p);
   }],
-  ['POST', /^\/spec\/validate$/, (_, body) => ({ issues: validate((body as { spec: Spec }).spec, db.settings.stockThicknesses) })],
+  ['POST', /^\/spec\/validate$/, (_, body) => {
+    const spec = (body as { spec: Spec }).spec;
+    return { issues: validate(spec, db.settings.stockThicknesses), fixings: fixings(spec) };
+  }],
   ['GET', /^\/settings$/, settingsView],
   ['PUT', /^\/settings$/, (_, body) => {
     const b = body as Partial<Settings> & { apiKey?: string };

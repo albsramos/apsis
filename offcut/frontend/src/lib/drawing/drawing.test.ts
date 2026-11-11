@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Spec } from '@/api';
-import { board, boxOf, cutList, explodedItems, fixingLines, fixingOf, isoScene, labelParts, orthoView, paintOrder, pilotHole, spread, stepFixings, stepScene } from '.';
+import { fixings as placeFixings } from '@/standalone/fixings';
+import { board, boxOf, cutList, drillPatterns, explodedItems, fixingLines, holeTable, isoScene, labelParts, orthoView, paintOrder, stepFixings, stepScene } from '.';
 
 // The same fixture the Go validator tests use.
 const spec = JSON.parse(
@@ -123,56 +124,66 @@ describe('step scenes', () => {
   });
 });
 
-describe('fixings', () => {
-  const joint = (a: string, b: string) => spec.joints.find((j) => j.a === a && j.b === b)!;
-
-  it('screws through the side into the edge of the bottom, 50 mm from each end', () => {
-    const f = fixingOf(spec, joint('side_left', 'bottom'))!;
-    expect(f.through.id).toBe('side_left');
-    expect(f.axis).toBe('x');
-    expect(f.direction).toBe(1);
-    expect(f.entries.map((p) => p.x)).toEqual([0, 0, 0]);
-    expect(f.holes.map((p) => p.z)).toEqual([50, 197, 344]);
-    expect(f.holes.every((p) => p.x === 18 && p.y === 9)).toBe(true);
-  });
-
-  it('screws a drawer front on from inside the box, so no heads show', () => {
-    const f = fixingOf(spec, joint('drawer_front', 'drawer_front_inner'))!;
-    expect(f.through.id).toBe('drawer_front_inner');
-    expect(f.into.id).toBe('drawer_front');
-  });
-
-  it('nails the drawer bottom up into the box', () => {
-    const f = fixingOf(spec, joint('drawer_bottom', 'drawer_side_left'))!;
-    expect(f.through.id).toBe('drawer_bottom');
-    expect(f.direction).toBe(1);
-  });
-
-  it('spaces fixings from the ends, or centres a single one', () => {
-    expect(spread(394, 2)).toEqual([50, 344]);
-    expect(spread(100, 1)).toEqual([50]);
-    expect(spread(60, 3)).toEqual([10, 30, 50]);
-    expect(pilotHole(4)).toBe(2.5);
-  });
+describe('fixing instructions', () => {
+  const fixings = placeFixings(spec);
+  const { byPart } = labelParts(spec);
+  const letter = (id: string) => byPart.get(id)!.letter;
 
   it('says how to fix each step, listing matching joints once', () => {
-    const { byPart } = labelParts(spec);
-    const lines = fixingLines(spec, 0, (id) => byPart.get(id)!.letter);
+    const lines = fixingLines(spec, fixings, 0, letter);
     expect(lines).toHaveLength(1);
     expect(lines[0]!.times).toBe(2);
-    expect(lines[0]!.text).toContain('3 screws (4 × 40 mm) through B into C');
-    expect(lines[0]!.text).toContain('2.5 mm pilot holes');
+    expect(lines[0]!.text).toContain('3 screws (4 × 40 mm) through B into C, 50 mm from each end');
+    expect(lines[0]!.text).toContain('2.5 mm pilot holes 22 mm deep into C');
   });
 
-  it('fits the runners in the step that slides the drawer in', () => {
-    expect(stepFixings(spec, 5)).toHaveLength(0);
-    const { byPart } = labelParts(spec);
-    const lines = fixingLines(spec, 5, (id) => byPart.get(id)!.letter);
+  it('splits a dowel by how thick each board is', () => {
+    const lines = fixingLines(spec, fixings, 2, letter);
+    expect(lines[0]!.text).toContain('8 mm holes 12 mm deep in A and 30 mm deep in B');
+  });
+
+  it('fits the runners in the step that slides the drawer in, not before', () => {
+    expect(fixingLines(spec, fixings, 4, letter).some((l) => l.text.includes('runner'))).toBe(false);
+    const lines = fixingLines(spec, fixings, 5, letter);
     expect(lines).toHaveLength(1);
     expect(lines[0]!.text).toContain('runner');
+    expect(stepFixings(spec, fixings, 5)).toHaveLength(0);
   });
 
   it('draws a guide for every screw in a step', () => {
-    expect(stepScene(spec, 0).guides).toHaveLength(6);
+    expect(stepScene(spec, 0, fixings).guides).toHaveLength(6);
+  });
+});
+
+describe('part sheet holes', () => {
+  const fixings = placeFixings(spec);
+  const { groups, byPart } = labelParts(spec);
+  const group = (id: string) => groups.find((g) => g === byPart.get(id))!;
+
+  it('drills a left and a right side the same, from the outside', () => {
+    const [pattern, ...rest] = drillPatterns(spec, fixings, group('side_left'));
+    expect(rest).toHaveLength(0);
+    expect(pattern!.partIds.sort()).toEqual(['side_left', 'side_right']);
+    const face = pattern!.views.find((v) => v.view === 'face')!;
+    expect(face.title).toBe('Outside face');
+    expect([...new Set(face.holes.map((h) => h.u))]).toEqual([9, 369]);
+    expect([face.left, face.top]).toEqual(['bottom', 'front']);
+    const end = pattern!.views.find((v) => v.view === 'end')!;
+    expect([end.title, end.top]).toEqual(['Top end', 'outside']);
+  });
+
+  it('gives a bottom and a shelf their own drawings: they are drilled differently', () => {
+    const patterns = drillPatterns(spec, fixings, group('bottom'));
+    expect(patterns).toHaveLength(2);
+    const rows = holeTable(patterns.find((p) => p.partIds.includes('bottom'))!);
+    expect(rows).toEqual([
+      { count: 3, text: '⌀2.5 pilot, 22 deep, in the left end' },
+      { count: 3, text: '⌀2.5 pilot, 22 deep, in the right end' },
+    ]);
+  });
+
+  it('puts the top dowel holes in its underside', () => {
+    const [pattern] = drillPatterns(spec, fixings, group('top'));
+    expect(holeTable(pattern!)).toEqual([{ count: 4, text: '⌀8 for a dowel, 12 deep, in the inside face' }]);
   });
 });

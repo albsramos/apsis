@@ -614,6 +614,76 @@
                 }
             }
         },
+        "Fastener": {
+            "type": "object",
+            "required": [
+                "start",
+                "tip"
+            ],
+            "properties": {
+                "start": {
+                    "$ref": "#/definitions/Vec3"
+                },
+                "tip": {
+                    "$ref": "#/definitions/Vec3"
+                }
+            }
+        },
+        "Fixing": {
+            "type": "object",
+            "required": [
+                "axis",
+                "direction",
+                "endDistance",
+                "fasteners",
+                "holes",
+                "into",
+                "joint",
+                "method",
+                "through"
+            ],
+            "properties": {
+                "axis": {
+                    "type": "string"
+                },
+                "direction": {
+                    "type": "integer"
+                },
+                "endDistance": {
+                    "description": "EndDistance is how far the first and last fastener sit from the ends of the joint.",
+                    "type": "number"
+                },
+                "fasteners": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Fastener"
+                    }
+                },
+                "hardware": {
+                    "type": "string"
+                },
+                "holes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Hole"
+                    }
+                },
+                "into": {
+                    "type": "string"
+                },
+                "joint": {
+                    "description": "index into the spec's joints",
+                    "type": "integer"
+                },
+                "method": {
+                    "$ref": "#/definitions/JointMethod"
+                },
+                "through": {
+                    "description": "the part a screw or nail is driven through; for a dowel, the first part",
+                    "type": "string"
+                }
+            }
+        },
         "Hardware": {
             "type": "object",
             "required": [
@@ -622,8 +692,15 @@
                 "quantity"
             ],
             "properties": {
+                "diameter": {
+                    "description": "Diameter and Length, in mm, for screws, nails and dowels: the holes are\nworked out from them.",
+                    "type": "number"
+                },
                 "id": {
                     "type": "string"
+                },
+                "length": {
+                    "type": "number"
                 },
                 "name": {
                     "type": "string"
@@ -650,6 +727,79 @@
                     "type": "integer"
                 }
             }
+        },
+        "Hole": {
+            "type": "object",
+            "required": [
+                "at",
+                "axis",
+                "countersink",
+                "depth",
+                "diameter",
+                "direction",
+                "kind",
+                "part",
+                "through"
+            ],
+            "properties": {
+                "at": {
+                    "description": "where the drill goes in, on the part's surface",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Vec3"
+                        }
+                    ]
+                },
+                "axis": {
+                    "description": "x, y or z: the drilling direction",
+                    "type": "string"
+                },
+                "countersink": {
+                    "type": "boolean"
+                },
+                "depth": {
+                    "type": "number"
+                },
+                "diameter": {
+                    "type": "number"
+                },
+                "direction": {
+                    "description": "+1 or -1 along that axis",
+                    "type": "integer"
+                },
+                "kind": {
+                    "$ref": "#/definitions/HoleKind"
+                },
+                "part": {
+                    "type": "string"
+                },
+                "through": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "HoleKind": {
+            "type": "string",
+            "enum": [
+                "clearance",
+                "pilot",
+                "dowel"
+            ],
+            "x-enum-comments": {
+                "Clearance": "through the first board, the screw's diameter",
+                "DowelHole": "half of a dowel, in each board",
+                "Pilot": "into the second board, for the thread"
+            },
+            "x-enum-descriptions": [
+                "through the first board, the screw's diameter",
+                "into the second board, for the thread",
+                "half of a dowel, in each board"
+            ],
+            "x-enum-varnames": [
+                "Clearance",
+                "Pilot",
+                "DowelHole"
+            ]
         },
         "Issue": {
             "type": "object",
@@ -1134,6 +1284,7 @@
             "type": "object",
             "required": [
                 "createdAt",
+                "fixings",
                 "issues",
                 "source",
                 "spec",
@@ -1142,6 +1293,13 @@
             "properties": {
                 "createdAt": {
                     "type": "string"
+                },
+                "fixings": {
+                    "description": "Fixings are worked out from the spec: where every screw, nail and dowel goes, and its holes.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Fixing"
+                    }
                 },
                 "issues": {
                     "type": "array",
@@ -1261,9 +1419,16 @@
         "ValidateResponse": {
             "type": "object",
             "required": [
+                "fixings",
                 "issues"
             ],
             "properties": {
+                "fixings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Fixing"
+                    }
+                },
                 "issues": {
                     "type": "array",
                     "items": {

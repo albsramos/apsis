@@ -5,12 +5,15 @@
  * Photos of a piece of furniture in; parts, joints and assembly steps out.
  * OpenAPI spec version: 0.1
  */
+import type { Fixing } from './fixing';
 import type { Issue } from './issue';
 import type { Spec } from './spec';
 import type { SpecVersionSource } from './specVersionSource';
 
 export interface SpecVersion {
   createdAt: string;
+  /** Fixings are worked out from the spec: where every screw, nail and dowel goes, and its holes. */
+  fixings: Fixing[];
   issues: Issue[];
   source: SpecVersionSource;
   spec: Spec;

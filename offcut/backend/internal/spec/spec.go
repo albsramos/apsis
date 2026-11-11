@@ -87,7 +87,11 @@ type Hardware struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Quantity int    `json:"quantity"`
-	Notes    string `json:"notes,omitempty"`
+	// Diameter and Length, in mm, for screws, nails and dowels: the holes are
+	// worked out from them.
+	Diameter float64 `json:"diameter,omitempty"`
+	Length   float64 `json:"length,omitempty"`
+	Notes    string  `json:"notes,omitempty"`
 } //@name Hardware
 
 type HardwareUse struct {

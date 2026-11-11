@@ -1,4 +1,4 @@
-import type { Spec, Step, Vec3 } from '@/api';
+import type { Fixing, Spec, Step, Vec3 } from '@/api';
 import { boxOf, center, pieceBox, union, type Axis, type Box } from './geometry';
 import { subAssemblies } from './assemblies';
 import { stepFixings } from './fixings';
@@ -39,7 +39,7 @@ const LEAD = 40;
  * on. A step that fits a finished sub-assembly in (a drawer on its runners)
  * shows it pulled out of the case, with an arrow.
  */
-export function stepScene(spec: Spec, stepIndex: number): StepScene {
+export function stepScene(spec: Spec, stepIndex: number, fixings: Fixing[] = []): StepScene {
   const steps: Step[] = spec.steps;
   const step = steps[stepIndex];
   const added = new Set(step?.parts ?? []);
@@ -146,18 +146,23 @@ export function stepScene(spec: Spec, stepIndex: number): StepScene {
   const at = new Map(items.map((it) => [it.part.id, it.offset ?? ZERO]));
   const plus = (p: Vec3, o: Vec3): Vec3 => ({ x: p.x + o.x, y: p.y + o.y, z: p.z + o.z });
   const guides: StepScene['guides'] = [];
-  for (const f of stepFixings(spec, stepIndex)) {
-    const ot = at.get(f.through.id), oi = at.get(f.into.id);
-    if (!ot || !oi || f.joint.method === 'glue' || f.joint.method === 'groove') continue;
-    f.holes.forEach((hole, k) => {
-      if (f.joint.method === 'dowel') {
-        guides.push({ kind: 'dowel', from: plus(hole, ot), to: plus(hole, oi) });
-        return;
+  for (const f of stepFixings(spec, fixings, stepIndex)) {
+    const ot = at.get(f.through), oi = at.get(f.into);
+    const through = byId.get(f.through);
+    if (!ot || !oi || !through) continue;
+    const axis = f.axis as 'x' | 'y' | 'z';
+    const thick = boxOf(through).max[axis] - boxOf(through).min[axis];
+    for (const fs of f.fasteners) {
+      if (f.method === 'dowel') {
+        // Where its two holes are: the shared face, on each part as drawn.
+        const plane = holePlane(f, fs.start) ?? fs.start;
+        guides.push({ kind: 'dowel', from: plus(plane, ot), to: plus(plane, oi) });
+        continue;
       }
-      const entry = f.entries[k]!;
-      const start = { ...entry, [f.axis]: entry[f.axis] - f.direction * LEAD };
-      guides.push({ kind: 'screw', from: plus(start, ot), to: plus(hole, ot), hole: plus(hole, oi) });
-    });
+      const start = { ...fs.start, [axis]: fs.start[axis] - f.direction * LEAD };
+      const out = { ...fs.start, [axis]: fs.start[axis] + f.direction * thick };
+      guides.push({ kind: 'screw', from: plus(start, ot), to: plus(out, ot), hole: plus(out, oi) });
+    }
   }
   return { items, added, moved, arrows, guides };
 }
@@ -168,4 +173,11 @@ function meetingAxis(a: Box, b: Box): Axis | null {
     if (Math.abs(a.max[axis] - b.min[axis]) <= 0.5 || Math.abs(b.max[axis] - a.min[axis]) <= 0.5) return axis;
   }
   return null;
+}
+
+/** The shared face a dowel crosses: where its holes start. */
+function holePlane(f: Fixing, near: Vec3): Vec3 | null {
+  const axis = f.axis as 'x' | 'y' | 'z';
+  const hole = f.holes.find((h) => (['x', 'y', 'z'] as const).every((k) => k === axis || Math.abs(h.at[k] - near[k]) < 0.5));
+  return hole ? hole.at : null;
 }

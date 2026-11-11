@@ -2,6 +2,7 @@
 // build, which has no server. Keep the two in step: same checks, same codes,
 // same messages.
 import type { Hardware, Issue, Part, Spec, Vec3 } from '@/api';
+import { BREAK_OUT_MARGIN, boxOf as fixBox, extent, fixings, maxDowel, segmentDistance, thicknessAxis } from './fixings';
 
 export const TOLERANCE = 0.5;
 export const MAX_RUNNER_GAP = 20;
@@ -207,5 +208,94 @@ export function validate(s: Spec, stock: number[] = DEFAULT_STOCK_THICKNESSES): 
   });
   const missing = valid.filter((p) => !addedIn.has(p.id)).map((p) => p.id);
   if (missing.length) add('error', 'step_missing_part', 'steps', `These parts are never added in any step: ${quoteAll(missing)}.`, ...missing);
+  checkFixings(s, parts, hw, add);
   return issues;
+}
+
+const NAIL_DIAMETER = 1.2;
+const AXIS = { x: 0, y: 1, z: 2 } as Record<string, number>;
+
+type Add = (severity: 'error' | 'warning', code: string, path: string, message: string, ...parts: string[]) => void;
+
+// See validate_fixings.go.
+function checkFixings(s: Spec, parts: Map<string, Part>, hw: Map<string, Hardware>, add: Add) {
+  const unsized = new Set<string>();
+  for (const j of s.joints) {
+    const h = j.hardware ? hw.get(j.hardware) : undefined;
+    if (!h || unsized.has(h.id)) continue;
+    let missing = '';
+    if ((j.method === 'screw' || j.method === 'dowel') && !(h.diameter! > 0 && h.length! > 0)) missing = '"diameter" and "length"';
+    if (j.method === 'brad_nail' && !(h.length! > 0)) missing = '"length"';
+    if (missing) {
+      unsized.add(h.id);
+      add('error', 'hardware_size', `hardware.${h.id}`, `Hardware ${q(h.id)} is used for ${j.method} joints; give its ${missing} in mm, so the holes can be worked out.`);
+    }
+  }
+  const segments: { joint: number; a: Vec3; b: Vec3; d: number }[] = [];
+  for (const f of fixings(s)) {
+    const h = f.hardware ? hw.get(f.hardware) : undefined;
+    const pt = parts.get(f.through), pi = parts.get(f.into);
+    if ((h && unsized.has(h.id)) || !pt || !pi) continue;
+    const bt = fixBox(pt), bi = fixBox(pi);
+    const axis = AXIS[f.axis]!;
+    const tT = extent(bt, axis), deep = extent(bi, axis);
+    let d = h?.diameter ?? 0;
+    if (f.method === 'brad_nail' && d <= 0) d = NAIL_DIAMETER;
+    const kind = ({ screw: 'screws', brad_nail: 'nails', dowel: 'dowels' } as Record<string, string>)[f.method] ?? '';
+    const path = `joints[${f.joint}]`;
+    const length = h?.length ?? 0;
+    if ((f.method === 'screw' || f.method === 'brad_nail') && length > 0) {
+      const into = length - tT;
+      if (into > deep - BREAK_OUT_MARGIN) {
+        add('error', 'fixing_breaks_out', path,
+          `The ${fmtMM(length)} mm ${kind} in joint ${f.joint} go ${fmtMM(into)} mm into ${q(f.into)}, which is only ${fmtMM(deep)} mm deep there, so they would come out the other side. Use ${kind} no longer than ${fmtMM(Math.floor(tT + deep - BREAK_OUT_MARGIN))} mm.`, f.through, f.into);
+      } else if (length < 2 * tT) {
+        add('warning', 'fixing_short', path,
+          `The ${fmtMM(length)} mm ${kind} in joint ${f.joint} go through ${fmtMM(tT)} mm of ${q(f.through)} and only ${fmtMM(into)} mm into ${q(f.into)}. Use ${kind} at least ${fmtMM(Math.ceil(2 * tT))} mm long, so they hold.`, f.through, f.into);
+      }
+    }
+    if (f.method === 'dowel') {
+      for (const hole of f.holes) {
+        const b = fixBox(parts.get(hole.part)!);
+        if (hole.depth > extent(b, axis) - BREAK_OUT_MARGIN) {
+          add('error', 'fixing_too_deep', path,
+            `The ${fmtMM(length)} mm dowels in joint ${f.joint} need ${fmtMM(hole.depth)} mm deep holes in ${q(hole.part)}, which is only ${fmtMM(extent(b, axis))} mm thick there. Use dowels no longer than ${fmtMM(maxDowel(bt, bi, axis))} mm.`, f.through, f.into);
+          break;
+        }
+      }
+    }
+    if (f.method === 'screw' || f.method === 'dowel') {
+      const need = f.method === 'dowel' ? 2 * d : 2.5 * d;
+      for (const p of [pi, pt]) {
+        if (p.id === f.through && f.method !== 'dowel') continue;
+        const b = fixBox(p);
+        if (thicknessAxis(b) === axis) continue;
+        const t = extent(b, thicknessAxis(b));
+        if (t < need) {
+          add('error', 'fixing_edge_thin', path,
+            `Joint ${f.joint} puts ${fmtMM(d)} mm ${kind} into the ${fmtMM(t)} mm edge of ${q(p.id)}; an edge needs to be at least ${fmtMM(need)} mm thick for them. Use thinner ${kind}, or join it another way.`, f.through, f.into);
+        }
+      }
+      if (f.endDistance < need) {
+        add('warning', 'fixing_near_end', path,
+          `The ${kind} in joint ${f.joint} sit ${fmtMM(f.endDistance)} mm from the ends of the joint, close enough to split the wood. Use fewer of them.`, f.through, f.into);
+      }
+    }
+    for (const fs of f.fasteners) segments.push({ joint: f.joint, a: fs.start, b: fs.tip, d });
+  }
+  const reported = new Set<string>();
+  for (let i = 0; i < segments.length; i++) {
+    for (let k = i + 1; k < segments.length; k++) {
+      const a = segments[i]!, b = segments[k]!;
+      const key = `${a.joint}|${b.joint}`;
+      if (a.joint === b.joint || reported.has(key)) continue;
+      const [dist, near] = segmentDistance(a.a, a.b, b.a, b.b);
+      if (dist < (a.d + b.d) / 2 + 1) {
+        reported.add(key);
+        const ja = s.joints[a.joint]!, jb = s.joints[b.joint]!;
+        add('error', 'fixings_clash', 'joints',
+          `The fixings of joint ${a.joint} (${q(ja.a)} to ${q(ja.b)}) and joint ${b.joint} (${q(jb.a)} to ${q(jb.b)}) meet inside the wood near ${fmtVec(near)}. Change one joint's count so they are spaced differently, or join the parts another way.`, ja.a, ja.b, jb.a, jb.b);
+      }
+    }
+  }
 }

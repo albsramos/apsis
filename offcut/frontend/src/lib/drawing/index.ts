@@ -7,3 +7,4 @@ export * from './iso';
 export * from './explode';
 export * from './assemblies';
 export * from './fixings';
+export * from './holes';

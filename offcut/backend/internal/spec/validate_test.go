@@ -123,3 +123,91 @@ func TestBoardSortsExtents(t *testing.T) {
 		t.Fatalf("got %v %v %v", l, w, th)
 	}
 }
+
+func hardware(s *Spec, id string) *Hardware {
+	for i := range s.Hardware {
+		if s.Hardware[i].ID == id {
+			return &s.Hardware[i]
+		}
+	}
+	panic("no hardware " + id)
+}
+
+func joint(s *Spec, a, b string) *Joint {
+	for i := range s.Joints {
+		if s.Joints[i].A == a && s.Joints[i].B == b {
+			return &s.Joints[i]
+		}
+	}
+	panic("no joint " + a + " " + b)
+}
+
+// Fixings that can't work in the wood they go into.
+func TestCatchesFixingsThatDontFit(t *testing.T) {
+	cases := []struct {
+		name   string
+		break_ func(s *Spec)
+		want   string
+	}{
+		{"screws without a size", func(s *Spec) {
+			hardware(s, "screw_4x40").Diameter = 0
+		}, "hardware_size"},
+		{"drawer-front screws that come out the front", func(s *Spec) {
+			hardware(s, "screw_3x25").Length = 35
+		}, "fixing_breaks_out"},
+		{"dowels face to face, deeper than either board", func(s *Spec) {
+			j := joint(s, "drawer_front", "drawer_front_inner")
+			j.Method, j.Hardware = Dowel, "dowel_8"
+			hardware(s, "dowel_8").Quantity = 8
+		}, "fixing_too_deep"},
+		{"a thick screw into a thin edge", func(s *Spec) {
+			hardware(s, "screw_4x40").Diameter = 8
+		}, "fixing_edge_thin"},
+		{"drawer-front screws that hit the nails holding the box", func(s *Spec) {
+			joint(s, "drawer_front", "drawer_front_inner").Count = 9
+			hardware(s, "screw_3x25").Quantity = 9
+		}, "fixings_clash"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			s := Example()
+			c.break_(&s)
+			got := codes(Validate(s, Options{}), Error)
+			if !slices.Contains(got, c.want) {
+				t.Fatalf("want %s, got %v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestShortScrewsAreAWarning(t *testing.T) {
+	s := Example()
+	hardware(&s, "screw_4x40").Length = 30
+	if got := codes(Validate(s, Options{}), Warning); !slices.Contains(got, "fixing_short") {
+		t.Fatalf("want fixing_short, got %v", got)
+	}
+}
+
+func TestFixingsGoThroughTheRightBoard(t *testing.T) {
+	byJoint := map[[2]string]Fixing{}
+	s := Example()
+	for _, f := range Fixings(s) {
+		j := s.Joints[f.Joint]
+		byJoint[[2]string{j.A, j.B}] = f
+	}
+	side := byJoint[[2]string{"side_left", "bottom"}]
+	if side.Through != "side_left" || side.Axis != "x" || len(side.Fasteners) != 3 {
+		t.Fatalf("side to bottom: %+v", side)
+	}
+	if side.Holes[1].Kind != Pilot || side.Holes[1].Depth != 22 || side.Holes[1].Diameter != 2.5 {
+		t.Fatalf("pilot hole: %+v", side.Holes[1])
+	}
+	front := byJoint[[2]string{"drawer_front", "drawer_front_inner"}]
+	if front.Through != "drawer_front_inner" {
+		t.Fatalf("drawer front should be screwed on from inside, got through %q", front.Through)
+	}
+	top := byJoint[[2]string{"top", "side_left"}]
+	if top.Holes[0].Part != "top" || top.Holes[0].Depth != 12 || top.Holes[1].Depth != 30 {
+		t.Fatalf("a dowel goes no more than 2/3 into the top's face: %+v", top.Holes)
+	}
+}

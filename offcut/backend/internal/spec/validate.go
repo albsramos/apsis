@@ -43,8 +43,8 @@ func HasErrors(issues []Issue) bool {
 
 // Validate checks that a spec describes a piece that can be built: the parts
 // add up to the overall size, nothing occupies the same space, every joint
-// joins parts that touch, everything is connected, and every part is added in
-// exactly one step.
+// joins parts that touch, everything is connected, every part is added in
+// exactly one step, and every screw, nail and dowel fits the wood it goes in.
 func Validate(s Spec, opt Options) []Issue {
 	v := validator{s: s, opt: opt, parts: map[string]Part{}}
 	if len(v.opt.StockThicknesses) == 0 {
@@ -61,6 +61,7 @@ func Validate(s Spec, opt Options) []Issue {
 	v.joints(hw)
 	v.connected()
 	v.steps(hw)
+	v.fixings(hw)
 	return v.issues
 }
 

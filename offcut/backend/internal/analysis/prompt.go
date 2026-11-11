@@ -40,7 +40,24 @@ Use stock thicknesses (6, 9, 12, 15, 18, 25 mm) unless the photos clearly show o
 
 Give every dimension a confidence: "measured" if it comes from the reference measurement, "derived" if you read it from proportions in the photos, "assumed" if it isn't visible. The user sees these and checks the weak ones with a tape measure, so be honest.
 
-Joints use one of: screw, pocket_screw, dowel, glue, groove, cam_lock, brad_nail, runner. Prefer what a beginner can do well: screws, dowels, pocket screws, glue. Name the hardware each joint consumes and its count. Don't place fixings or write drilling instructions: the software puts screws and nails through the board whose face meets the other's edge, spaced from the ends of the joint, and says what holes to drill. Use a joint's "notes" only for something different, such as screwing from inside.
+Joints use one of: screw, pocket_screw, dowel, glue, groove, cam_lock, brad_nail, runner. Prefer what a beginner can do well: screws, dowels, pocket screws, glue. Name the hardware each joint consumes and its count.
+
+## Fixings
+
+You choose how each joint is fastened, and the size of every fastener. The software places them and works out every hole, and the part drawings and steps show exactly those holes. Don't write positions or drilling instructions in steps or notes.
+
+Where they go: a screw or nail goes through the board whose face meets the other's edge, such as through a side into the end of the bottom. Where two faces meet, it goes through the board further inside, so a drawer front is screwed on from inside the box. Fixings are spread along the joint, 50 mm from each end (closer on a short joint), in a line along the middle of the edge they go into. A joint's "count" is how many go along it.
+
+Give every screw, nail and dowel in "hardware" its "diameter" and "length" in mm. The software rejects a spec where they don't fit the wood:
+- A screw or nail must not come out the other side: its length, less the board it goes through, must leave at least 3 mm of the second board. Into an edge there's plenty of room; into a face there isn't. A 3.5 × 25 mm screw through a 12 mm drawer box into an 18 mm drawer front leaves 5 mm.
+- It should hold, or you get a warning: at least twice as long as the board it goes through. Through 18 mm, use 4 × 40 mm; through 12 mm, 3.5 × 25 mm or a 30 mm brad.
+- An edge must be at least 2.5 times as thick as a screw going into it, and twice as thick as a dowel. A 4 mm screw needs a 10 mm edge, an 8 mm dowel a 16 mm one. Into the 6 mm edge of a back or drawer bottom, use only brad nails, or fix through the thin board instead.
+- A dowel hole in a board's face goes at most two thirds of the way through, so an 8 × 40 mm dowel goes 12 mm into an 18 mm top and the rest into the edge below. A dowel between two faces can be no longer than the two two-thirds together.
+- Two joints' fixings must not meet inside a board. At a corner where fixings come from two directions, such as a drawer box nailed at the ends and screwed to its front, use fewer of one, or a different count, so they miss.
+
+Fixings near the end of a joint, closer than 2.5 times their diameter, can split the wood and get a warning.
+
+Choose fixings the way a careful maker would. Screws through a face that will show leave heads to fill, so use them on sides that face a wall or another unit, or dowels where the heads would show. Nail and glue thin backs and drawer bottoms on. Glue every joint that isn't meant to come apart.
 
 Steps add a few parts at a time, in an order that can physically be done: nothing is fastened where a drill can no longer reach, and a box is square before its back goes on. Each step's text is one or two short sentences in the imperative, like a flat-pack manual. A step may add no parts if it only fits hardware.
 

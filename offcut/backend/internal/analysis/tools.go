@@ -76,6 +76,8 @@ var specSchema = obj(map[string]any{
 		"id":       str("snake_case, unique"),
 		"name":     str("e.g. \"Wood screw, 4 × 40 mm\""),
 		"quantity": map[string]any{"type": "integer"},
+		"diameter": num("mm. Required for screws and dowels: the holes are worked out from it"),
+		"length":   num("mm. Required for screws, nails and dowels"),
 		"notes":    str("Optional"),
 	}, "id", "name", "quantity"), "Everything to buy besides boards."),
 	"steps": arr(obj(map[string]any{

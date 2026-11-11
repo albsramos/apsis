@@ -408,22 +408,30 @@
   {
    "id": "dowel_8",
    "name": "Dowel, 8 × 40 mm",
-   "quantity": 4
+   "quantity": 4,
+   "diameter": 8,
+   "length": 40
   },
   {
    "id": "screw_4x40",
    "name": "Wood screw, 4 × 40 mm",
-   "quantity": 10
+   "quantity": 10,
+   "diameter": 4,
+   "length": 40
   },
   {
    "id": "screw_3x25",
    "name": "Wood screw, 3.5 × 25 mm",
-   "quantity": 4
+   "quantity": 4,
+   "diameter": 3.5,
+   "length": 25
   },
   {
    "id": "brad_30",
    "name": "Brad nail, 30 mm",
-   "quantity": 40
+   "quantity": 40,
+   "diameter": 1.2,
+   "length": 30
   },
   {
    "id": "runner_350",

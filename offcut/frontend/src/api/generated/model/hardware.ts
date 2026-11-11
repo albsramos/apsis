@@ -7,7 +7,13 @@
  */
 
 export interface Hardware {
+  /**
+     * Diameter and Length, in mm, for screws, nails and dowels: the holes are
+     * worked out from them.
+     */
+  diameter?: number;
   id: string;
+  length?: number;
   name: string;
   notes?: string;
   quantity: number;

@@ -41,7 +41,11 @@ frontend/                 Vite + React + TypeScript + CSS Modules
 5. **Only design tokens** (`src/styles/tokens.css`) for colour, space, radius and type. Drawings use them through CSS
    classes.
 6. **Every screen works at 390 px wide.** Side panels become bottom sheets below 760 px.
-7. **The conversation is provider-neutral and append-only.** The service stores `llm.Message`s; adapters translate. A
+7. **Fixings are worked out, never drawn by hand or asked of the model.** `spec/fixings.go` places every screw, nail
+   and dowel and its holes; the API returns them with each spec, and the drawings only draw them. A physical rule about
+   fixings goes in the validator with a test. `frontend/src/standalone` copies the validator and fixings for the
+   serverless build: change both together.
+8. **The conversation is provider-neutral and append-only.** The service stores `llm.Message`s; adapters translate. A
    provider's thinking blocks go back unchanged to that provider and are dropped for the others.
 
 ## Before committing

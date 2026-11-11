@@ -28,6 +28,11 @@ joins parts that touch, that everything is connected, and that every part is add
 the parts, and go back to the model as tool results. All drawings are computed from the spec, so editing a size redraws
 everything and re-runs the checks without another AI call.
 
+The model chooses each joint's fastener and its size; it never places them. `spec/fixings.go` puts every screw, nail
+and dowel where a maker would, works out each clearance, pilot and dowel hole, and the validator checks that they fit
+the wood: no screw comes out the other side, no edge is too thin, no dowel hole is deeper than its board, and no two
+fixings meet. The part sheets and the steps draw exactly those holes.
+
 Photos can't show scale or hidden joinery. One real measurement gives the scale. The model designs a simple, sound
 construction (screws, dowels, a nailed-on back) and says so. Every dimension carries a confidence: *measured*, *read
 from the photos* or *assumed*. The assumed ones are flagged to check with a tape before cutting.
@@ -86,6 +91,6 @@ make check   # also regenerates the API and fails if it drifted, plus vet, gofmt
 - Curved, turned or upholstered parts. They are modelled as boards and listed as simplifications.
 - Dimensions that follow an edit: changing a side's thickness doesn't shorten the shelf yet. The checks show what no
   longer fits.
-- Hole and screw positions on the part sheets, and drawings to a printable scale.
+- Drawings to a printable scale, and holes for knobs, hinges and cam locks: their fittings come with templates.
 - Accounts. It's single-user and self-hosted for now.
 - Live progress over SSE; the UI polls once a second during an analysis.

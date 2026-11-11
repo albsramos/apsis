@@ -5,8 +5,10 @@
  * Photos of a piece of furniture in; parts, joints and assembly steps out.
  * OpenAPI spec version: 0.1
  */
+import type { Fixing } from './fixing';
 import type { Issue } from './issue';
 
 export interface ValidateResponse {
+  fixings: Fixing[];
   issues: Issue[];
 }
