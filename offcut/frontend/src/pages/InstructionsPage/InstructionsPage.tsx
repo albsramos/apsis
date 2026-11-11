@@ -103,8 +103,8 @@ function StepViewer({ projectId, name, spec, index }: { projectId: string; name:
             <ArrowLeft size={22} aria-hidden="true" />
           </Button>
           <Button variant="primary" size="lg" className={styles.next} onClick={() => move(1)}>
+            {index + 1 === total ? 'Done' : 'Next'}
             {index + 1 === total ? <Check size={20} aria-hidden="true" /> : <ArrowRight size={20} aria-hidden="true" />}
-            {index + 1 === total ? 'Done' : 'Done, next step'}
           </Button>
         </footer>
       )}

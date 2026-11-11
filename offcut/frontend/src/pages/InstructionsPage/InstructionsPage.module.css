@@ -167,6 +167,7 @@
 
 .footer {
   display: flex;
+  justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4) var(--space-5);
   border-top: 1px solid var(--color-line);
@@ -178,8 +179,9 @@
 }
 
 .next {
-  flex-grow: 1;
+  min-width: 140px;
   min-height: 60px;
+  padding-inline: var(--space-6);
 }
 
 .allSteps {
