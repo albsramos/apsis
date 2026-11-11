@@ -61,6 +61,10 @@ cp backend/.env.example backend/.env       # set APP_SECRET
 
 The app starts in demo mode. Choose a provider and add a key in Settings.
 
+To try it with no server at all, `cd frontend && npm run build:standalone` writes `dist-standalone/offcut.html`: one
+self-contained page with an in-browser copy of the API (`src/standalone`), the demo AI and the validator. It keeps its
+data in the browser, and it can't reach a real AI.
+
 ## Stack
 
 - **Backend:** Go, layered handler → service → repository; Postgres via pgx; swag annotations for OpenAPI.

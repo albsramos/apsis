@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Box, Camera, Settings } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { getListProjectsQueryKey, useCreateProject, useListProjects, type ProjectSummary } from '@/api';
+import { getListProjectsQueryKey, photoUrl, useCreateProject, useListProjects, type ProjectSummary } from '@/api';
 import { Page, TopBar } from '@/components/layout';
 import { StatusBadge } from '@/components/project/StatusBadge';
 import { Button, Callout, Dialog, Field, IconButton, Input, Spinner } from '@/components/ui';
@@ -65,7 +65,7 @@ function ProjectCard({ project: p }: { project: ProjectSummary }) {
   return (
     <Link to={`/projects/${p.id}`} className={styles.card}>
       <span className={styles.thumb}>
-        {p.coverPhotoId ? <img src={`/api/photos/${p.coverPhotoId}`} alt="" loading="lazy" /> : <Box size={28} aria-hidden="true" />}
+        {p.coverPhotoId ? <img src={photoUrl(p.coverPhotoId)} alt="" loading="lazy" /> : <Box size={28} aria-hidden="true" />}
       </span>
       <span className={styles.cardBody}>
         <span className={styles.cardTitle}>{p.name}</span>

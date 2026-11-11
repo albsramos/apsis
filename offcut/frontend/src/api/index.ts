@@ -7,4 +7,4 @@ export * from './generated/photos/photos';
 export * from './generated/analysis/analysis';
 export * from './generated/specs/specs';
 export * from './generated/settings/settings';
-export { ApiError } from './fetcher';
+export { ApiError, photoUrl } from './fetcher';

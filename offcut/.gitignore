@@ -6,3 +6,4 @@ backend/data/
 backend/server
 .DS_Store
 *.tsbuildinfo
+dist-standalone/
