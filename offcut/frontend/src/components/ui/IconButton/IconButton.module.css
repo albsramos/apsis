@@ -1,0 +1,22 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch);
+  height: var(--touch);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-sunken);
+}
+
+.button:disabled {
+  color: var(--color-line-strong);
+  cursor: not-allowed;
+}

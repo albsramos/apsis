@@ -1,0 +1,39 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.trigger {
+  min-height: var(--touch);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.trigger:hover {
+  background: var(--color-sunken);
+}
+
+.trigger[data-state='active'] {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.content {
+  min-width: 0;
+}
+
+.content:focus-visible {
+  outline-offset: 4px;
+}

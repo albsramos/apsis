@@ -1,0 +1,13 @@
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+}
+
+.board {
+  fill: var(--draw-face-front);
+  stroke: var(--draw-line);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}

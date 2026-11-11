@@ -1,0 +1,302 @@
+.page {
+  padding: var(--space-4);
+}
+
+.viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--color-surface);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3) 0;
+}
+
+.headerTitle {
+  flex-grow: 1;
+  overflow: hidden;
+  font-weight: var(--weight-medium);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.segment {
+  flex: 1 1 0;
+  height: 20px;
+  padding: 8px 0;
+  border: 0;
+  background: var(--color-line);
+  background-clip: content-box;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.segmentDone {
+  background-color: var(--color-ink);
+}
+
+.segmentNow {
+  background-color: var(--color-highlight);
+}
+
+.step {
+  display: grid;
+  flex-grow: 1;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'say'
+    'drawing'
+    'need';
+  min-height: 0;
+}
+
+.say {
+  grid-area: say;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.number {
+  font-size: 56px;
+  font-weight: var(--weight-semibold);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+.stepOf {
+  display: none;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+}
+
+.text {
+  font-size: var(--text-lg);
+  line-height: 1.35;
+}
+
+.drawing {
+  grid-area: drawing;
+  min-height: 0;
+  padding: var(--space-2) var(--space-4);
+  touch-action: pan-y;
+}
+
+.need {
+  grid-area: need;
+  margin: 0 var(--space-4) var(--space-3);
+  padding: var(--space-3);
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-lg);
+}
+
+.needLabel {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+}
+
+.needList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.needList li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.needQty {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.needLetter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.needName {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+.glyph {
+  flex-shrink: 0;
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.glyphSoft {
+  fill: var(--color-highlight-soft);
+  stroke: var(--color-highlight);
+}
+
+.footer {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-line);
+}
+
+.prev {
+  width: 72px;
+  min-height: 60px;
+}
+
+.next {
+  flex-grow: 1;
+  min-height: 60px;
+}
+
+.allSteps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.allStep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.allStep:hover {
+  background: var(--color-paper);
+}
+
+.allStepNow {
+  background: var(--color-highlight-soft);
+}
+
+.allNum {
+  width: 24px;
+  font-family: var(--font-mono);
+}
+
+.finished {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--space-3);
+  min-height: 0;
+  padding-bottom: var(--space-5);
+  text-align: center;
+}
+
+.finished .drawing {
+  flex-grow: 1;
+}
+
+.finishedTitle {
+  font-size: var(--text-2xl);
+}
+
+.finishedActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+}
+
+/* Wider screens: number and text on the left, the drawing in the middle, what you need on the right. */
+@media (min-width: 760px) {
+  .step {
+    grid-template-columns: 200px minmax(0, 1fr) 240px;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: 'say drawing need';
+    padding: var(--space-6) var(--space-8);
+    gap: var(--space-6);
+  }
+
+  .say {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .number {
+    font-size: var(--text-display);
+  }
+
+  .stepOf {
+    display: block;
+  }
+
+  .need {
+    align-self: start;
+    margin: 0;
+  }
+
+  .needList {
+    flex-direction: column;
+  }
+}
+
+.print {
+  padding: var(--space-6);
+}
+
+.printTitle {
+  margin-bottom: var(--space-4);
+}
+
+.printPage {
+  display: flex;
+  height: 92vh;
+  break-after: page;
+}
+
+.printPage .step {
+  width: 100%;
+}
+
+@media print {
+  .print {
+    padding: 0;
+  }
+}

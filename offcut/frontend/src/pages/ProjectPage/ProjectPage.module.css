@@ -1,0 +1,28 @@
+.name {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.banner {
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.sheet {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.danger {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+@media print {
+  .banner {
+    display: none;
+  }
+}

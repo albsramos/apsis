@@ -1,0 +1,71 @@
+/* Design tokens. Components use these and nothing else for colour, space,
+   radius and type. The drawings read the same tokens through CSS classes. */
+:root {
+  /* colour */
+  --color-paper: #f4f5f2;
+  --color-surface: #ffffff;
+  --color-sunken: #e9ebe6;
+  --color-ink: #1a1d21;
+  --color-ink-muted: #5b636b;
+  --color-line: #d9dcd6;
+  --color-line-strong: #5b636b;
+
+  --color-accent: #1d5fc4;
+  --color-accent-hover: #164a99;
+  --color-accent-soft: #e6eefb;
+  --color-on-accent: #ffffff;
+
+  /* the current selection, and anything to check with a tape measure */
+  --color-highlight: #b4480b;
+  --color-highlight-ink: #8a3608;
+  --color-highlight-soft: #fbe9dc;
+  --color-on-highlight: #ffffff;
+
+  --color-success: #1e7a46;
+  --color-success-soft: #e4f3ea;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+
+  /* drawing */
+  --draw-line: var(--color-ink);
+  --draw-hidden: var(--color-ink-muted);
+  --draw-dimension: var(--color-accent);
+  --draw-face-front: #ffffff;
+  --draw-face-top: #f4f5f2;
+  --draw-face-side: #e2e5df;
+
+  /* space: 4px steps */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 999px;
+
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+  --text-display: 96px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --touch: 44px;
+  --shadow-overlay: 0 12px 32px rgb(26 29 33 / 0.18);
+  --shadow-raised: 0 1px 2px rgb(26 29 33 / 0.08);
+  --overlay: rgb(26 29 33 / 0.4);
+  --duration: 150ms;
+}

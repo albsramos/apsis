@@ -1,0 +1,1295 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Photos of a piece of furniture in; parts, joints and assembly steps out.",
+        "title": "Offcut API",
+        "contact": {},
+        "version": "0.1"
+    },
+    "basePath": "/api",
+    "paths": {
+        "/photos/{id}": {
+            "get": {
+                "produces": [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                    "image/gif"
+                ],
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Get a photo's image",
+                "operationId": "getPhoto",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Photo id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Delete a photo the AI hasn't seen yet",
+                "operationId": "deletePhoto",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Photo id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "projects"
+                ],
+                "summary": "List projects, most recently changed first",
+                "operationId": "listProjects",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProjectSummary"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Create a project",
+                "operationId": "createProject",
+                "parameters": [
+                    {
+                        "description": "The project",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Project"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Get a project with its photos, latest spec and what the AI is waiting on",
+                "operationId": "getProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Project"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Delete a project, its photos and its specs",
+                "operationId": "deleteProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Rename a project",
+                "operationId": "renameProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The new name",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RenameProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Project"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}/analyze": {
+            "post": {
+                "description": "The first call needs photos and a reference measurement. When the AI is waiting (status needs_input), send answers and add photos first, or skip. Otherwise new photos or notes start a re-analysis. Returns at once; poll the project for its status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analysis"
+                ],
+                "summary": "Start or continue the AI analysis",
+                "operationId": "analyzeProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "What the user adds",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AnalyzeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/Project"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}/photos": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Add a photo to a project",
+                "operationId": "uploadPhoto",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "The photo (JPEG, PNG, WebP or GIF)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Which view it shows, e.g. Front",
+                        "name": "view",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Photo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}/spec": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specs"
+                ],
+                "summary": "Save an edited spec as a new version",
+                "operationId": "updateSpec",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The whole spec",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateSpecRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SpecVersion"
+                        }
+                    }
+                }
+            }
+        },
+        "/settings": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Get the AI provider settings. The API key itself is never returned.",
+                "operationId": "getSettings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Change the AI provider settings",
+                "operationId": "updateSettings",
+                "parameters": [
+                    {
+                        "description": "The settings",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Settings"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/settings/test": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Check the saved provider settings with one small request",
+                "operationId": "testConnection",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TestResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/spec/validate": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specs"
+                ],
+                "summary": "Check a spec without saving it",
+                "operationId": "validateSpec",
+                "parameters": [
+                    {
+                        "description": "The whole spec",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateSpecRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ValidateResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "AnalyzeRequest": {
+            "type": "object",
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "reference": {
+                    "$ref": "#/definitions/Reference"
+                },
+                "skip": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "AxisConfidence": {
+            "type": "object",
+            "required": [
+                "x",
+                "y",
+                "z"
+            ],
+            "properties": {
+                "x": {
+                    "$ref": "#/definitions/Confidence"
+                },
+                "y": {
+                    "$ref": "#/definitions/Confidence"
+                },
+                "z": {
+                    "$ref": "#/definitions/Confidence"
+                }
+            }
+        },
+        "Confidence": {
+            "type": "string",
+            "enum": [
+                "measured",
+                "derived",
+                "assumed"
+            ],
+            "x-enum-comments": {
+                "Assumed": "not visible; a sensible default",
+                "Derived": "proportion read from the photos",
+                "Measured": "from the user's reference measurement"
+            },
+            "x-enum-descriptions": [
+                "from the user's reference measurement",
+                "proportion read from the photos",
+                "not visible; a sensible default"
+            ],
+            "x-enum-varnames": [
+                "Measured",
+                "Derived",
+                "Assumed"
+            ]
+        },
+        "ConversationEntry": {
+            "type": "object",
+            "required": [
+                "role",
+                "text"
+            ],
+            "properties": {
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "assistant"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateProjectRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Bedside table"
+                }
+            }
+        },
+        "Dimension": {
+            "type": "object",
+            "required": [
+                "confidence",
+                "value"
+            ],
+            "properties": {
+                "confidence": {
+                    "$ref": "#/definitions/Confidence"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "Hardware": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "quantity"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "HardwareUse": {
+            "type": "object",
+            "required": [
+                "id",
+                "quantity"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Issue": {
+            "type": "object",
+            "required": [
+                "code",
+                "message",
+                "path",
+                "severity"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "path": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/Severity"
+                }
+            }
+        },
+        "Joint": {
+            "type": "object",
+            "required": [
+                "a",
+                "b",
+                "count",
+                "method"
+            ],
+            "properties": {
+                "a": {
+                    "type": "string"
+                },
+                "b": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "hardware": {
+                    "type": "string"
+                },
+                "method": {
+                    "$ref": "#/definitions/JointMethod"
+                },
+                "notes": {
+                    "type": "string"
+                }
+            }
+        },
+        "JointMethod": {
+            "type": "string",
+            "enum": [
+                "screw",
+                "pocket_screw",
+                "dowel",
+                "glue",
+                "groove",
+                "cam_lock",
+                "brad_nail",
+                "runner"
+            ],
+            "x-enum-varnames": [
+                "Screw",
+                "PocketScrew",
+                "Dowel",
+                "Glue",
+                "Groove",
+                "CamLock",
+                "BradNail",
+                "Runner"
+            ]
+        },
+        "Overall": {
+            "type": "object",
+            "required": [
+                "depth",
+                "height",
+                "width"
+            ],
+            "properties": {
+                "depth": {
+                    "$ref": "#/definitions/Dimension"
+                },
+                "height": {
+                    "$ref": "#/definitions/Dimension"
+                },
+                "width": {
+                    "$ref": "#/definitions/Dimension"
+                }
+            }
+        },
+        "Part": {
+            "type": "object",
+            "required": [
+                "confidence",
+                "id",
+                "material",
+                "name",
+                "position",
+                "size"
+            ],
+            "properties": {
+                "confidence": {
+                    "$ref": "#/definitions/AxisConfidence"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "material": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/definitions/Vec3"
+                },
+                "size": {
+                    "$ref": "#/definitions/Vec3"
+                }
+            }
+        },
+        "Pending": {
+            "type": "object",
+            "required": [
+                "message",
+                "questions",
+                "shots"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Question"
+                    }
+                },
+                "shots": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Shot"
+                    }
+                }
+            }
+        },
+        "Photo": {
+            "type": "object",
+            "required": [
+                "createdAt",
+                "id",
+                "sent",
+                "url",
+                "view"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "sent": {
+                    "type": "boolean"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "view": {
+                    "type": "string"
+                }
+            }
+        },
+        "Project": {
+            "type": "object",
+            "required": [
+                "conversation",
+                "createdAt",
+                "error",
+                "id",
+                "name",
+                "notes",
+                "photos",
+                "status",
+                "updatedAt"
+            ],
+            "properties": {
+                "conversation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConversationEntry"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "pending": {
+                    "$ref": "#/definitions/Pending"
+                },
+                "photos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Photo"
+                    }
+                },
+                "reference": {
+                    "$ref": "#/definitions/Reference"
+                },
+                "spec": {
+                    "$ref": "#/definitions/SpecVersion"
+                },
+                "status": {
+                    "$ref": "#/definitions/ProjectStatus"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectStatus": {
+            "type": "string",
+            "enum": [
+                "draft",
+                "analyzing",
+                "needs_input",
+                "ready",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "StatusDraft",
+                "StatusAnalyzing",
+                "StatusNeedsInput",
+                "StatusReady",
+                "StatusFailed"
+            ]
+        },
+        "ProjectSummary": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "partCount",
+                "pendingCount",
+                "photoCount",
+                "status",
+                "updatedAt"
+            ],
+            "properties": {
+                "coverPhotoId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "overall": {
+                    "$ref": "#/definitions/Overall"
+                },
+                "partCount": {
+                    "type": "integer"
+                },
+                "pendingCount": {
+                    "type": "integer"
+                },
+                "photoCount": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/ProjectStatus"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "Question": {
+            "type": "object",
+            "required": [
+                "question",
+                "reason"
+            ],
+            "properties": {
+                "question": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "Reference": {
+            "type": "object",
+            "required": [
+                "label",
+                "mm"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "example": "Top width"
+                },
+                "mm": {
+                    "type": "number",
+                    "example": 450
+                }
+            }
+        },
+        "RenameProjectRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Settings": {
+            "type": "object",
+            "required": [
+                "baseUrl",
+                "defaultModel",
+                "hasKey",
+                "model",
+                "provider",
+                "stockThicknesses"
+            ],
+            "properties": {
+                "baseUrl": {
+                    "type": "string"
+                },
+                "defaultModel": {
+                    "type": "string"
+                },
+                "hasKey": {
+                    "type": "boolean"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string",
+                    "enum": [
+                        "anthropic",
+                        "openai",
+                        "demo"
+                    ]
+                },
+                "stockThicknesses": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "Severity": {
+            "type": "string",
+            "enum": [
+                "error",
+                "warning"
+            ],
+            "x-enum-comments": {
+                "Error": "the piece cannot be built as specified",
+                "Warning": "buildable, but worth a look"
+            },
+            "x-enum-descriptions": [
+                "the piece cannot be built as specified",
+                "buildable, but worth a look"
+            ],
+            "x-enum-varnames": [
+                "Error",
+                "Warning"
+            ]
+        },
+        "Shot": {
+            "type": "object",
+            "required": [
+                "reason",
+                "view"
+            ],
+            "properties": {
+                "reason": {
+                    "type": "string"
+                },
+                "view": {
+                    "type": "string"
+                }
+            }
+        },
+        "Spec": {
+            "type": "object",
+            "required": [
+                "assumptions",
+                "hardware",
+                "joints",
+                "name",
+                "overall",
+                "parts",
+                "reference",
+                "simplifications",
+                "steps"
+            ],
+            "properties": {
+                "assumptions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hardware": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Hardware"
+                    }
+                },
+                "joints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Joint"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "overall": {
+                    "$ref": "#/definitions/Overall"
+                },
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Part"
+                    }
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "simplifications": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Step"
+                    }
+                }
+            }
+        },
+        "SpecVersion": {
+            "type": "object",
+            "required": [
+                "createdAt",
+                "issues",
+                "source",
+                "spec",
+                "version"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Issue"
+                    }
+                },
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "ai",
+                        "user"
+                    ]
+                },
+                "spec": {
+                    "$ref": "#/definitions/Spec"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Step": {
+            "type": "object",
+            "required": [
+                "hardware",
+                "parts",
+                "text",
+                "title"
+            ],
+            "properties": {
+                "hardware": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/HardwareUse"
+                    }
+                },
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "TestResult": {
+            "type": "object",
+            "required": [
+                "latencyMs",
+                "message",
+                "ok"
+            ],
+            "properties": {
+                "latencyMs": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "ok": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "UpdateSettingsRequest": {
+            "type": "object",
+            "required": [
+                "baseUrl",
+                "model",
+                "provider",
+                "stockThicknesses"
+            ],
+            "properties": {
+                "apiKey": {
+                    "description": "Leave out to keep the stored key; send \"\" to remove it.",
+                    "type": "string"
+                },
+                "baseUrl": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string",
+                    "enum": [
+                        "anthropic",
+                        "openai",
+                        "demo"
+                    ]
+                },
+                "stockThicknesses": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "UpdateSpecRequest": {
+            "type": "object",
+            "required": [
+                "spec"
+            ],
+            "properties": {
+                "spec": {
+                    "$ref": "#/definitions/Spec"
+                }
+            }
+        },
+        "ValidateResponse": {
+            "type": "object",
+            "required": [
+                "issues"
+            ],
+            "properties": {
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Issue"
+                    }
+                }
+            }
+        },
+        "Vec3": {
+            "type": "object",
+            "required": [
+                "x",
+                "y",
+                "z"
+            ],
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,894 @@
+basePath: /api
+definitions:
+  AnalyzeRequest:
+    properties:
+      answers:
+        items:
+          type: string
+        type: array
+      notes:
+        type: string
+      reference:
+        $ref: '#/definitions/Reference'
+      skip:
+        type: boolean
+    type: object
+  AxisConfidence:
+    properties:
+      x:
+        $ref: '#/definitions/Confidence'
+      "y":
+        $ref: '#/definitions/Confidence'
+      z:
+        $ref: '#/definitions/Confidence'
+    required:
+    - x
+    - "y"
+    - z
+    type: object
+  Confidence:
+    enum:
+    - measured
+    - derived
+    - assumed
+    type: string
+    x-enum-comments:
+      Assumed: not visible; a sensible default
+      Derived: proportion read from the photos
+      Measured: from the user's reference measurement
+    x-enum-descriptions:
+    - from the user's reference measurement
+    - proportion read from the photos
+    - not visible; a sensible default
+    x-enum-varnames:
+    - Measured
+    - Derived
+    - Assumed
+  ConversationEntry:
+    properties:
+      role:
+        enum:
+        - user
+        - assistant
+        type: string
+      text:
+        type: string
+    required:
+    - role
+    - text
+    type: object
+  CreateProjectRequest:
+    properties:
+      name:
+        example: Bedside table
+        type: string
+    required:
+    - name
+    type: object
+  Dimension:
+    properties:
+      confidence:
+        $ref: '#/definitions/Confidence'
+      value:
+        type: number
+    required:
+    - confidence
+    - value
+    type: object
+  ErrorResponse:
+    properties:
+      error:
+        type: string
+    required:
+    - error
+    type: object
+  Hardware:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - id
+    - name
+    - quantity
+    type: object
+  HardwareUse:
+    properties:
+      id:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - id
+    - quantity
+    type: object
+  Issue:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      parts:
+        items:
+          type: string
+        type: array
+      path:
+        type: string
+      severity:
+        $ref: '#/definitions/Severity'
+    required:
+    - code
+    - message
+    - path
+    - severity
+    type: object
+  Joint:
+    properties:
+      a:
+        type: string
+      b:
+        type: string
+      count:
+        type: integer
+      hardware:
+        type: string
+      method:
+        $ref: '#/definitions/JointMethod'
+      notes:
+        type: string
+    required:
+    - a
+    - b
+    - count
+    - method
+    type: object
+  JointMethod:
+    enum:
+    - screw
+    - pocket_screw
+    - dowel
+    - glue
+    - groove
+    - cam_lock
+    - brad_nail
+    - runner
+    type: string
+    x-enum-varnames:
+    - Screw
+    - PocketScrew
+    - Dowel
+    - Glue
+    - Groove
+    - CamLock
+    - BradNail
+    - Runner
+  Overall:
+    properties:
+      depth:
+        $ref: '#/definitions/Dimension'
+      height:
+        $ref: '#/definitions/Dimension'
+      width:
+        $ref: '#/definitions/Dimension'
+    required:
+    - depth
+    - height
+    - width
+    type: object
+  Part:
+    properties:
+      confidence:
+        $ref: '#/definitions/AxisConfidence'
+      id:
+        type: string
+      material:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      position:
+        $ref: '#/definitions/Vec3'
+      size:
+        $ref: '#/definitions/Vec3'
+    required:
+    - confidence
+    - id
+    - material
+    - name
+    - position
+    - size
+    type: object
+  Pending:
+    properties:
+      message:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/Question'
+        type: array
+      shots:
+        items:
+          $ref: '#/definitions/Shot'
+        type: array
+    required:
+    - message
+    - questions
+    - shots
+    type: object
+  Photo:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      sent:
+        type: boolean
+      url:
+        type: string
+      view:
+        type: string
+    required:
+    - createdAt
+    - id
+    - sent
+    - url
+    - view
+    type: object
+  Project:
+    properties:
+      conversation:
+        items:
+          $ref: '#/definitions/ConversationEntry'
+        type: array
+      createdAt:
+        type: string
+      error:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      pending:
+        $ref: '#/definitions/Pending'
+      photos:
+        items:
+          $ref: '#/definitions/Photo'
+        type: array
+      reference:
+        $ref: '#/definitions/Reference'
+      spec:
+        $ref: '#/definitions/SpecVersion'
+      status:
+        $ref: '#/definitions/ProjectStatus'
+      updatedAt:
+        type: string
+    required:
+    - conversation
+    - createdAt
+    - error
+    - id
+    - name
+    - notes
+    - photos
+    - status
+    - updatedAt
+    type: object
+  ProjectStatus:
+    enum:
+    - draft
+    - analyzing
+    - needs_input
+    - ready
+    - failed
+    type: string
+    x-enum-varnames:
+    - StatusDraft
+    - StatusAnalyzing
+    - StatusNeedsInput
+    - StatusReady
+    - StatusFailed
+  ProjectSummary:
+    properties:
+      coverPhotoId:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      overall:
+        $ref: '#/definitions/Overall'
+      partCount:
+        type: integer
+      pendingCount:
+        type: integer
+      photoCount:
+        type: integer
+      status:
+        $ref: '#/definitions/ProjectStatus'
+      updatedAt:
+        type: string
+    required:
+    - id
+    - name
+    - partCount
+    - pendingCount
+    - photoCount
+    - status
+    - updatedAt
+    type: object
+  Question:
+    properties:
+      question:
+        type: string
+      reason:
+        type: string
+    required:
+    - question
+    - reason
+    type: object
+  Reference:
+    properties:
+      label:
+        example: Top width
+        type: string
+      mm:
+        example: 450
+        type: number
+    required:
+    - label
+    - mm
+    type: object
+  RenameProjectRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  Settings:
+    properties:
+      baseUrl:
+        type: string
+      defaultModel:
+        type: string
+      hasKey:
+        type: boolean
+      model:
+        type: string
+      provider:
+        enum:
+        - anthropic
+        - openai
+        - demo
+        type: string
+      stockThicknesses:
+        items:
+          type: number
+        type: array
+    required:
+    - baseUrl
+    - defaultModel
+    - hasKey
+    - model
+    - provider
+    - stockThicknesses
+    type: object
+  Severity:
+    enum:
+    - error
+    - warning
+    type: string
+    x-enum-comments:
+      Error: the piece cannot be built as specified
+      Warning: buildable, but worth a look
+    x-enum-descriptions:
+    - the piece cannot be built as specified
+    - buildable, but worth a look
+    x-enum-varnames:
+    - Error
+    - Warning
+  Shot:
+    properties:
+      reason:
+        type: string
+      view:
+        type: string
+    required:
+    - reason
+    - view
+    type: object
+  Spec:
+    properties:
+      assumptions:
+        items:
+          type: string
+        type: array
+      hardware:
+        items:
+          $ref: '#/definitions/Hardware'
+        type: array
+      joints:
+        items:
+          $ref: '#/definitions/Joint'
+        type: array
+      name:
+        type: string
+      overall:
+        $ref: '#/definitions/Overall'
+      parts:
+        items:
+          $ref: '#/definitions/Part'
+        type: array
+      reference:
+        type: string
+      simplifications:
+        items:
+          type: string
+        type: array
+      steps:
+        items:
+          $ref: '#/definitions/Step'
+        type: array
+    required:
+    - assumptions
+    - hardware
+    - joints
+    - name
+    - overall
+    - parts
+    - reference
+    - simplifications
+    - steps
+    type: object
+  SpecVersion:
+    properties:
+      createdAt:
+        type: string
+      issues:
+        items:
+          $ref: '#/definitions/Issue'
+        type: array
+      source:
+        enum:
+        - ai
+        - user
+        type: string
+      spec:
+        $ref: '#/definitions/Spec'
+      version:
+        type: integer
+    required:
+    - createdAt
+    - issues
+    - source
+    - spec
+    - version
+    type: object
+  Step:
+    properties:
+      hardware:
+        items:
+          $ref: '#/definitions/HardwareUse'
+        type: array
+      parts:
+        items:
+          type: string
+        type: array
+      text:
+        type: string
+      title:
+        type: string
+    required:
+    - hardware
+    - parts
+    - text
+    - title
+    type: object
+  TestResult:
+    properties:
+      latencyMs:
+        type: integer
+      message:
+        type: string
+      ok:
+        type: boolean
+    required:
+    - latencyMs
+    - message
+    - ok
+    type: object
+  UpdateSettingsRequest:
+    properties:
+      apiKey:
+        description: Leave out to keep the stored key; send "" to remove it.
+        type: string
+      baseUrl:
+        type: string
+      model:
+        type: string
+      provider:
+        enum:
+        - anthropic
+        - openai
+        - demo
+        type: string
+      stockThicknesses:
+        items:
+          type: number
+        type: array
+    required:
+    - baseUrl
+    - model
+    - provider
+    - stockThicknesses
+    type: object
+  UpdateSpecRequest:
+    properties:
+      spec:
+        $ref: '#/definitions/Spec'
+    required:
+    - spec
+    type: object
+  ValidateResponse:
+    properties:
+      issues:
+        items:
+          $ref: '#/definitions/Issue'
+        type: array
+    required:
+    - issues
+    type: object
+  Vec3:
+    properties:
+      x:
+        type: number
+      "y":
+        type: number
+      z:
+        type: number
+    required:
+    - x
+    - "y"
+    - z
+    type: object
+info:
+  contact: {}
+  description: Photos of a piece of furniture in; parts, joints and assembly steps
+    out.
+  title: Offcut API
+  version: "0.1"
+paths:
+  /photos/{id}:
+    delete:
+      operationId: deletePhoto
+      parameters:
+      - description: Photo id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a photo the AI hasn't seen yet
+      tags:
+      - photos
+    get:
+      operationId: getPhoto
+      parameters:
+      - description: Photo id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - image/jpeg
+      - image/png
+      - image/webp
+      - image/gif
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get a photo's image
+      tags:
+      - photos
+  /projects:
+    get:
+      operationId: listProjects
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProjectSummary'
+            type: array
+      summary: List projects, most recently changed first
+      tags:
+      - projects
+    post:
+      consumes:
+      - application/json
+      operationId: createProject
+      parameters:
+      - description: The project
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Project'
+      summary: Create a project
+      tags:
+      - projects
+  /projects/{id}:
+    delete:
+      operationId: deleteProject
+      parameters:
+      - description: Project id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a project, its photos and its specs
+      tags:
+      - projects
+    get:
+      operationId: getProject
+      parameters:
+      - description: Project id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get a project with its photos, latest spec and what the AI is waiting
+        on
+      tags:
+      - projects
+    patch:
+      consumes:
+      - application/json
+      operationId: renameProject
+      parameters:
+      - description: Project id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The new name
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/RenameProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Rename a project
+      tags:
+      - projects
+  /projects/{id}/analyze:
+    post:
+      consumes:
+      - application/json
+      description: The first call needs photos and a reference measurement. When the
+        AI is waiting (status needs_input), send answers and add photos first, or
+        skip. Otherwise new photos or notes start a re-analysis. Returns at once;
+        poll the project for its status.
+      operationId: analyzeProject
+      parameters:
+      - description: Project id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: What the user adds
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/AnalyzeRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Start or continue the AI analysis
+      tags:
+      - analysis
+  /projects/{id}/photos:
+    post:
+      consumes:
+      - multipart/form-data
+      operationId: uploadPhoto
+      parameters:
+      - description: Project id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The photo (JPEG, PNG, WebP or GIF)
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Which view it shows, e.g. Front
+        in: formData
+        name: view
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Photo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Add a photo to a project
+      tags:
+      - photos
+  /projects/{id}/spec:
+    put:
+      consumes:
+      - application/json
+      operationId: updateSpec
+      parameters:
+      - description: Project id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The whole spec
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateSpecRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SpecVersion'
+      summary: Save an edited spec as a new version
+      tags:
+      - specs
+  /settings:
+    get:
+      operationId: getSettings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Settings'
+      summary: Get the AI provider settings. The API key itself is never returned.
+      tags:
+      - settings
+    put:
+      consumes:
+      - application/json
+      operationId: updateSettings
+      parameters:
+      - description: The settings
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Settings'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Change the AI provider settings
+      tags:
+      - settings
+  /settings/test:
+    post:
+      operationId: testConnection
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/TestResult'
+      summary: Check the saved provider settings with one small request
+      tags:
+      - settings
+  /spec/validate:
+    post:
+      consumes:
+      - application/json
+      operationId: validateSpec
+      parameters:
+      - description: The whole spec
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateSpecRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ValidateResponse'
+      summary: Check a spec without saving it
+      tags:
+      - specs
+swagger: "2.0"

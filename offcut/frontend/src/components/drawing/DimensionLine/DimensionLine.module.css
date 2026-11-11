@@ -1,0 +1,10 @@
+.dim line {
+  stroke: var(--draw-dimension);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.dim text {
+  fill: var(--draw-dimension);
+  font-family: var(--font-mono);
+}

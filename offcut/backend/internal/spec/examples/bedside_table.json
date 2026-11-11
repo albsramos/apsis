@@ -1,0 +1,531 @@
+{
+ "name": "Bedside table",
+ "reference": "Top width, 450 mm, measured by you.",
+ "overall": {
+  "width": {
+   "value": 450,
+   "confidence": "measured"
+  },
+  "height": {
+   "value": 550,
+   "confidence": "derived"
+  },
+  "depth": {
+   "value": 400,
+   "confidence": "derived"
+  }
+ },
+ "parts": [
+  {
+   "id": "top",
+   "name": "Top",
+   "material": "18 mm plywood",
+   "position": {
+    "x": 0,
+    "y": 532,
+    "z": 0
+   },
+   "size": {
+    "x": 450,
+    "y": 18,
+    "z": 400
+   },
+   "confidence": {
+    "x": "measured",
+    "y": "assumed",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "side_left",
+   "name": "Side",
+   "material": "18 mm plywood",
+   "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+   },
+   "size": {
+    "x": 18,
+    "y": 532,
+    "z": 394
+   },
+   "confidence": {
+    "x": "assumed",
+    "y": "derived",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "side_right",
+   "name": "Side",
+   "material": "18 mm plywood",
+   "position": {
+    "x": 432,
+    "y": 0,
+    "z": 0
+   },
+   "size": {
+    "x": 18,
+    "y": 532,
+    "z": 394
+   },
+   "confidence": {
+    "x": "assumed",
+    "y": "derived",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "bottom",
+   "name": "Bottom",
+   "material": "18 mm plywood",
+   "position": {
+    "x": 18,
+    "y": 0,
+    "z": 0
+   },
+   "size": {
+    "x": 414,
+    "y": 18,
+    "z": 394
+   },
+   "confidence": {
+    "x": "derived",
+    "y": "assumed",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "shelf",
+   "name": "Shelf",
+   "material": "18 mm plywood",
+   "position": {
+    "x": 18,
+    "y": 360,
+    "z": 0
+   },
+   "size": {
+    "x": 414,
+    "y": 18,
+    "z": 394
+   },
+   "confidence": {
+    "x": "derived",
+    "y": "assumed",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "back",
+   "name": "Back",
+   "material": "6 mm plywood",
+   "position": {
+    "x": 0,
+    "y": 0,
+    "z": 394
+   },
+   "size": {
+    "x": 450,
+    "y": 532,
+    "z": 6
+   },
+   "confidence": {
+    "x": "measured",
+    "y": "derived",
+    "z": "assumed"
+   },
+   "notes": "Not visible in the photos; a 6 mm panel nailed on is the simplest sound choice."
+  },
+  {
+   "id": "drawer_side_left",
+   "name": "Drawer side",
+   "material": "12 mm plywood",
+   "position": {
+    "x": 30.5,
+    "y": 385,
+    "z": 18
+   },
+   "size": {
+    "x": 12,
+    "y": 120,
+    "z": 350
+   },
+   "confidence": {
+    "x": "assumed",
+    "y": "derived",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "drawer_side_right",
+   "name": "Drawer side",
+   "material": "12 mm plywood",
+   "position": {
+    "x": 407.5,
+    "y": 385,
+    "z": 18
+   },
+   "size": {
+    "x": 12,
+    "y": 120,
+    "z": 350
+   },
+   "confidence": {
+    "x": "assumed",
+    "y": "derived",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "drawer_front_inner",
+   "name": "Drawer box front",
+   "material": "12 mm plywood",
+   "position": {
+    "x": 42.5,
+    "y": 385,
+    "z": 18
+   },
+   "size": {
+    "x": 365,
+    "y": 120,
+    "z": 12
+   },
+   "confidence": {
+    "x": "derived",
+    "y": "derived",
+    "z": "assumed"
+   }
+  },
+  {
+   "id": "drawer_back",
+   "name": "Drawer box back",
+   "material": "12 mm plywood",
+   "position": {
+    "x": 42.5,
+    "y": 385,
+    "z": 356
+   },
+   "size": {
+    "x": 365,
+    "y": 120,
+    "z": 12
+   },
+   "confidence": {
+    "x": "derived",
+    "y": "derived",
+    "z": "assumed"
+   }
+  },
+  {
+   "id": "drawer_bottom",
+   "name": "Drawer bottom",
+   "material": "6 mm plywood",
+   "position": {
+    "x": 42.5,
+    "y": 385,
+    "z": 30
+   },
+   "size": {
+    "x": 365,
+    "y": 6,
+    "z": 326
+   },
+   "confidence": {
+    "x": "derived",
+    "y": "assumed",
+    "z": "derived"
+   }
+  },
+  {
+   "id": "drawer_front",
+   "name": "Drawer front",
+   "material": "18 mm plywood",
+   "position": {
+    "x": 20,
+    "y": 380,
+    "z": 0
+   },
+   "size": {
+    "x": 410,
+    "y": 150,
+    "z": 18
+   },
+   "confidence": {
+    "x": "derived",
+    "y": "derived",
+    "z": "assumed"
+   }
+  }
+ ],
+ "joints": [
+  {
+   "a": "top",
+   "b": "side_left",
+   "method": "dowel",
+   "count": 2,
+   "hardware": "dowel_8"
+  },
+  {
+   "a": "top",
+   "b": "side_right",
+   "method": "dowel",
+   "count": 2,
+   "hardware": "dowel_8"
+  },
+  {
+   "a": "side_left",
+   "b": "bottom",
+   "method": "screw",
+   "count": 3,
+   "hardware": "screw_4x40"
+  },
+  {
+   "a": "side_right",
+   "b": "bottom",
+   "method": "screw",
+   "count": 3,
+   "hardware": "screw_4x40"
+  },
+  {
+   "a": "side_left",
+   "b": "shelf",
+   "method": "screw",
+   "count": 2,
+   "hardware": "screw_4x40"
+  },
+  {
+   "a": "side_right",
+   "b": "shelf",
+   "method": "screw",
+   "count": 2,
+   "hardware": "screw_4x40"
+  },
+  {
+   "a": "back",
+   "b": "side_left",
+   "method": "brad_nail",
+   "count": 6,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "back",
+   "b": "side_right",
+   "method": "brad_nail",
+   "count": 6,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "back",
+   "b": "bottom",
+   "method": "brad_nail",
+   "count": 4,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_front_inner",
+   "b": "drawer_side_left",
+   "method": "brad_nail",
+   "count": 3,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_front_inner",
+   "b": "drawer_side_right",
+   "method": "brad_nail",
+   "count": 3,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_back",
+   "b": "drawer_side_left",
+   "method": "brad_nail",
+   "count": 3,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_back",
+   "b": "drawer_side_right",
+   "method": "brad_nail",
+   "count": 3,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_bottom",
+   "b": "drawer_side_left",
+   "method": "brad_nail",
+   "count": 3,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_bottom",
+   "b": "drawer_side_right",
+   "method": "brad_nail",
+   "count": 3,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_side_left",
+   "b": "side_left",
+   "method": "runner",
+   "count": 1,
+   "hardware": "runner_350",
+   "notes": "12.5 mm gap for the runner."
+  },
+  {
+   "a": "drawer_side_right",
+   "b": "side_right",
+   "method": "runner",
+   "count": 1,
+   "hardware": "runner_350",
+   "notes": "12.5 mm gap for the runner."
+  },
+  {
+   "a": "drawer_front",
+   "b": "drawer_front_inner",
+   "method": "screw",
+   "count": 4,
+   "hardware": "screw_3x25",
+   "notes": "Screw from inside the drawer box."
+  }
+ ],
+ "hardware": [
+  {
+   "id": "dowel_8",
+   "name": "Dowel, 8 \u00d7 40 mm",
+   "quantity": 4
+  },
+  {
+   "id": "screw_4x40",
+   "name": "Wood screw, 4 \u00d7 40 mm",
+   "quantity": 10
+  },
+  {
+   "id": "screw_3x25",
+   "name": "Wood screw, 3.5 \u00d7 25 mm",
+   "quantity": 4
+  },
+  {
+   "id": "brad_30",
+   "name": "Brad nail, 30 mm",
+   "quantity": 40
+  },
+  {
+   "id": "runner_350",
+   "name": "Drawer runner, 350 mm (one side)",
+   "quantity": 2
+  },
+  {
+   "id": "knob",
+   "name": "Knob",
+   "quantity": 1
+  }
+ ],
+ "steps": [
+  {
+   "title": "Bottom to sides",
+   "text": "Stand the sides up. Screw the bottom between them, flush with the front.",
+   "parts": [
+    "side_left",
+    "side_right",
+    "bottom"
+   ],
+   "hardware": [
+    {
+     "id": "screw_4x40",
+     "quantity": 6
+    }
+   ]
+  },
+  {
+   "title": "Shelf",
+   "text": "Screw the shelf between the sides, 360 mm up from the floor.",
+   "parts": [
+    "shelf"
+   ],
+   "hardware": [
+    {
+     "id": "screw_4x40",
+     "quantity": 4
+    }
+   ]
+  },
+  {
+   "title": "Top",
+   "text": "Glue the dowels into the sides. Lower the top onto them.",
+   "parts": [
+    "top"
+   ],
+   "hardware": [
+    {
+     "id": "dowel_8",
+     "quantity": 4
+    }
+   ]
+  },
+  {
+   "title": "Back",
+   "text": "Check the case is square. Nail the back on.",
+   "parts": [
+    "back"
+   ],
+   "hardware": [
+    {
+     "id": "brad_30",
+     "quantity": 16
+    }
+   ]
+  },
+  {
+   "title": "Drawer box",
+   "text": "Nail the box front and back between the drawer sides, then nail the bottom in.",
+   "parts": [
+    "drawer_side_left",
+    "drawer_side_right",
+    "drawer_front_inner",
+    "drawer_back",
+    "drawer_bottom"
+   ],
+   "hardware": [
+    {
+     "id": "brad_30",
+     "quantity": 18
+    }
+   ]
+  },
+  {
+   "title": "Runners",
+   "text": "Screw the runners to the case sides and the drawer sides. Slide the drawer in.",
+   "parts": [],
+   "hardware": [
+    {
+     "id": "runner_350",
+     "quantity": 2
+    }
+   ]
+  },
+  {
+   "title": "Drawer front",
+   "text": "Hold the front in place with a 2 mm gap all round. Screw it on from inside, then fit the knob.",
+   "parts": [
+    "drawer_front"
+   ],
+   "hardware": [
+    {
+     "id": "screw_3x25",
+     "quantity": 4
+    },
+    {
+     "id": "knob",
+     "quantity": 1
+    }
+   ]
+  }
+ ],
+ "assumptions": [
+  "Board thickness is 18 mm; it can't be read from the photos.",
+  "The back is a 6 mm panel nailed on; the back isn't visible.",
+  "The drawer runs on 350 mm side-mounted runners."
+ ],
+ "simplifications": []
+}

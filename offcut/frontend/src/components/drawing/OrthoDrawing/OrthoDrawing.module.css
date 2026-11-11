@@ -1,0 +1,46 @@
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 72vh;
+}
+
+.viewLabel {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  fill: var(--color-ink-muted);
+}
+
+.part {
+  fill: var(--draw-face-front);
+  stroke: var(--draw-line);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+
+.part:hover {
+  fill: var(--color-accent-soft);
+}
+
+.selected,
+.selected:hover {
+  fill: var(--color-highlight-soft);
+  stroke: var(--color-highlight);
+  stroke-width: 2;
+}
+
+.flagged {
+  stroke: var(--color-danger);
+  stroke-width: 2;
+}
+
+.hidden rect {
+  fill: none;
+  stroke: var(--draw-hidden);
+  stroke-width: 0.8;
+  stroke-dasharray: 4 3;
+  opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}

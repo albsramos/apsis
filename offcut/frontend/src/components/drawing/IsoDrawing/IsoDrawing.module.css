@@ -1,0 +1,84 @@
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.face {
+  stroke: var(--draw-line);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.bold .face {
+  stroke-width: 2;
+}
+
+.top {
+  fill: var(--draw-face-top);
+}
+
+.front {
+  fill: var(--draw-face-front);
+}
+
+.left {
+  fill: var(--draw-face-side);
+}
+
+.highlight {
+  stroke: var(--color-highlight);
+  fill: var(--color-highlight-soft);
+}
+
+.highlight.left {
+  fill: var(--color-highlight-soft);
+  filter: brightness(0.95);
+}
+
+.selected {
+  stroke: var(--color-highlight);
+  stroke-width: 2.2;
+}
+
+.arrow line,
+.arrow polyline {
+  fill: none;
+  stroke: var(--draw-line);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.callout line {
+  stroke: var(--draw-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.callout circle {
+  fill: var(--color-surface);
+  stroke: var(--draw-line);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.callout text {
+  fill: var(--color-ink);
+  font-family: var(--font-mono);
+}
+
+.calloutHighlight circle {
+  fill: var(--color-highlight);
+  stroke: var(--color-highlight);
+}
+
+.calloutHighlight text {
+  fill: var(--color-on-highlight);
+}
+
+.calloutHighlight line {
+  stroke: var(--color-highlight);
+}
