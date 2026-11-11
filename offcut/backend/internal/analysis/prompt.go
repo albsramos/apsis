@@ -42,7 +42,32 @@ Give every dimension a confidence: "measured" if it comes from the reference mea
 
 Joints use one of: screw, pocket_screw, dowel, glue, groove, cam_lock, brad_nail, runner. Prefer what a beginner can do well: screws, dowels, pocket screws, glue. Name the hardware each joint consumes and its count.
 
-Steps add a few parts at a time, in an order that can physically be done: nothing is fastened where a drill can no longer reach, and a box is square before its back goes on. Each step's text is one or two short sentences in the imperative, like a flat-pack manual. A step may add no parts if it only fits hardware. Build a sub-assembly, such as a drawer box, in its own steps, then fit it in a later step that uses its runners; the drawings show a sub-assembly on its own until then.
+Steps add a few parts at a time, in an order that can physically be done: nothing is fastened where a drill can no longer reach, and a box is square before its back goes on. Each step's text is one or two short sentences in the imperative, like a flat-pack manual. A step may add no parts if it only fits hardware.
+
+## How to build box furniture
+
+Most pieces you'll see are a case with shelves, drawers or doors. Unless the photos show otherwise, build them this way, and say so in "assumptions".
+
+The case is two sides, a bottom and a top. The bottom fits between the sides. The top sits on the sides if its edges show on top, or fits between them if the sides run up to the top surface. Fix them with screws where they won't show, or dowels where they would.
+
+The back is 6 mm plywood, glued and nailed over the back edges of the sides and bottom, so those are 6 mm shallower than the overall depth. A top that sits on the sides runs the full depth, over the back. Fit it after the case is checked square, and before any drawer goes in. Don't put it in a groove: a groove makes two parts occupy the same space.
+
+A fixed shelf fits between the sides, as long as the inside width, and is screwed through them.
+
+A drawer is its own box, built in its own step: two sides, a front and a back between them, and a bottom underneath. Size it from its opening in the case:
+- width: the opening's width less a runner gap on each side, 12.5 mm for side-mounted runners
+- depth: a stock runner length (250, 300, 350, 400, 450 or 500 mm) at least 10 mm less than the inside depth
+- height: 25 to 35 mm less than the opening, so it clears
+
+So a 414 mm opening gives a 389 mm wide box, and with 12 mm sides its front and back are 365 mm long. Join each drawer side to the case side it runs against with a "runner" joint. Fit the runners and slide the drawer in, in a step of its own, after the case is finished.
+
+A drawer front is a separate board, fitted last: screwed on from inside the box once the drawer runs, then the knob. An inset front sits inside the opening with a 2 mm gap all round. An overlay front covers the case's front edges. Match the photos.
+
+A door is a board over the front of the case, joined to it with screws and with its hinges in the hardware list. If the original's doors sit inside the opening, model them over the front instead and say so in "simplifications".
+
+Legs are square-section boards under the bottom or at the corners. A plinth is a board set back about 50 mm under the front.
+
+Build in this order: the case, then fixed shelves, then the top; check it's square and fit the back; build each drawer box; fit the runners and slide the drawers in; then fit the drawer fronts, the knobs and the doors.
 
 If the piece has curves, turned legs, mouldings or upholstery, model them as boards and say what you simplified in "simplifications".
 
