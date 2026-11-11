@@ -90,8 +90,35 @@ describe('step scenes', () => {
     expect(s.arrows).toHaveLength(1);
   });
 
-  it('draws the first step in place', () => {
-    const s = stepScene(spec, 0);
-    expect(s.items.every((i) => !i.offset || (i.offset.x === 0 && i.offset.y === 0 && i.offset.z === 0))).toBe(true);
+  it('explodes a new sub-assembly around its own parts', () => {
+    const s = stepScene(spec, 0); // sides and bottom
+    const offset = (id: string) => s.items.find((i) => i.part.id === id)!.offset!;
+    expect(offset('side_left').x).toBeLessThan(0);
+    expect(offset('side_right').x).toBeGreaterThan(0);
+    expect(s.arrows).toHaveLength(3);
+  });
+
+  it('builds the drawer on its own, not inside the case', () => {
+    const s = stepScene(spec, 4);
+    const ids = s.items.map((i) => i.part.id);
+    expect(ids.sort()).toEqual(['drawer_back', 'drawer_bottom', 'drawer_front_inner', 'drawer_side_left', 'drawer_side_right']);
+    const offset = (id: string) => s.items.find((i) => i.part.id === id)!.offset!;
+    expect(offset('drawer_bottom').y).toBeLessThan(0);
+    expect(offset('drawer_front_inner').z).toBeLessThan(0);
+    expect(offset('drawer_back').z).toBeGreaterThan(0);
+  });
+
+  it('slides the finished drawer into the case on its runners', () => {
+    const s = stepScene(spec, 5);
+    expect(s.items).toHaveLength(11);
+    expect([...s.moved].sort()).toEqual(['drawer_back', 'drawer_bottom', 'drawer_front_inner', 'drawer_side_left', 'drawer_side_right']);
+    expect(s.items.find((i) => i.part.id === 'drawer_back')!.offset!.z).toBeLessThan(0);
+    expect(s.items.find((i) => i.part.id === 'side_left')!.offset).toBeUndefined();
+    expect(s.arrows).toHaveLength(1);
+  });
+
+  it('pulls a part back from what it is fastened to', () => {
+    const s = stepScene(spec, 6); // the drawer front goes on the drawer box
+    expect(s.items.find((i) => i.part.id === 'drawer_front')!.offset!.z).toBeLessThan(0);
   });
 });

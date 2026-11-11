@@ -159,7 +159,7 @@ function Step({ spec, labels, index, swipe }: { spec: Spec; labels: Labels; inde
         <IsoDrawing
           bold
           items={scene.items}
-          highlight={scene.added}
+          highlight={new Set([...scene.added, ...scene.moved])}
           letters={letters}
           callouts={scene.added}
           arrows={scene.arrows}

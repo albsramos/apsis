@@ -42,7 +42,7 @@ Give every dimension a confidence: "measured" if it comes from the reference mea
 
 Joints use one of: screw, pocket_screw, dowel, glue, groove, cam_lock, brad_nail, runner. Prefer what a beginner can do well: screws, dowels, pocket screws, glue. Name the hardware each joint consumes and its count.
 
-Steps add a few parts at a time, in an order that can physically be done: nothing is fastened where a drill can no longer reach, and a box is square before its back goes on. Each step's text is one or two short sentences in the imperative, like a flat-pack manual. A step may add no parts if it only fits hardware.
+Steps add a few parts at a time, in an order that can physically be done: nothing is fastened where a drill can no longer reach, and a box is square before its back goes on. Each step's text is one or two short sentences in the imperative, like a flat-pack manual. A step may add no parts if it only fits hardware. Build a sub-assembly, such as a drawer box, in its own steps, then fit it in a later step that uses its runners; the drawings show a sub-assembly on its own until then.
 
 If the piece has curves, turned legs, mouldings or upholstery, model them as boards and say what you simplified in "simplifications".
 
