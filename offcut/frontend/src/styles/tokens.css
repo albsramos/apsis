@@ -33,6 +33,9 @@
   --draw-face-front: #ffffff;
   --draw-face-top: #f4f5f2;
   --draw-face-side: #e2e5df;
+  --draw-highlight-front: #fdf1e8;
+  --draw-highlight-top: var(--color-highlight-soft);
+  --draw-highlight-side: #f2d9c6;
 
   /* space: 4px steps */
   --space-1: 4px;
@@ -68,4 +71,85 @@
   --shadow-raised: 0 1px 2px rgb(26 29 33 / 0.08);
   --overlay: rgb(26 29 33 / 0.4);
   --duration: 150ms;
+}
+
+/* Dark: a graphite drafting table. The same roles, so components don't change.
+   Screens only, so printed plans stay black on white. Follows the system
+   setting unless data-theme on <html> says otherwise. */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-paper: #141619;
+    --color-surface: #1c1f23;
+    --color-sunken: #101215;
+    --color-ink: #e6e8e3;
+    --color-ink-muted: #9aa1a8;
+    --color-line: #2d3136;
+    --color-line-strong: #8a9198;
+
+    --color-accent: #6aa3f2;
+    --color-accent-hover: #8cb9f6;
+    --color-accent-soft: #1a2a42;
+    --color-on-accent: #0b1422;
+
+    --color-highlight: #f0894a;
+    --color-highlight-ink: #f6a776;
+    --color-highlight-soft: #3b2416;
+    --color-on-highlight: #1d1007;
+
+    --color-success: #52c48a;
+    --color-success-soft: #142d20;
+    --color-danger: #f26b60;
+    --color-danger-soft: #3a1917;
+
+    --draw-face-front: #30343a;
+    --draw-face-top: #272a2f;
+    --draw-face-side: #1f2226;
+    --draw-highlight-front: #5a3a24;
+    --draw-highlight-top: #4a2f1c;
+    --draw-highlight-side: #3a2416;
+
+    --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.5);
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
+    --overlay: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+@media screen {
+  :root[data-theme='dark'] {
+    --color-paper: #141619;
+    --color-surface: #1c1f23;
+    --color-sunken: #101215;
+    --color-ink: #e6e8e3;
+    --color-ink-muted: #9aa1a8;
+    --color-line: #2d3136;
+    --color-line-strong: #8a9198;
+
+    --color-accent: #6aa3f2;
+    --color-accent-hover: #8cb9f6;
+    --color-accent-soft: #1a2a42;
+    --color-on-accent: #0b1422;
+
+    --color-highlight: #f0894a;
+    --color-highlight-ink: #f6a776;
+    --color-highlight-soft: #3b2416;
+    --color-on-highlight: #1d1007;
+
+    --color-success: #52c48a;
+    --color-success-soft: #142d20;
+    --color-danger: #f26b60;
+    --color-danger-soft: #3a1917;
+
+    --draw-face-front: #30343a;
+    --draw-face-top: #272a2f;
+    --draw-face-side: #1f2226;
+    --draw-highlight-front: #5a3a24;
+    --draw-highlight-top: #4a2f1c;
+    --draw-highlight-side: #3a2416;
+
+    --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.5);
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
+    --overlay: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
 }

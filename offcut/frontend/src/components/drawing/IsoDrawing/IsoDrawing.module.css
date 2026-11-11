@@ -29,12 +29,19 @@
 
 .highlight {
   stroke: var(--color-highlight);
-  fill: var(--color-highlight-soft);
+}
+
+/* Shaded like the other parts, so a highlighted part still reads as a solid. */
+.highlight.top {
+  fill: var(--draw-highlight-top);
+}
+
+.highlight.front {
+  fill: var(--draw-highlight-front);
 }
 
 .highlight.left {
-  fill: var(--color-highlight-soft);
-  filter: brightness(0.95);
+  fill: var(--draw-highlight-side);
 }
 
 .selected {
