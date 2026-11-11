@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Spec } from '@/api';
-import { board, boxOf, cutList, explodedItems, isoScene, labelParts, orthoView, paintOrder, stepScene } from '.';
+import { board, boxOf, cutList, explodedItems, fixingLines, fixingOf, isoScene, labelParts, orthoView, paintOrder, pilotHole, spread, stepFixings, stepScene } from '.';
 
 // The same fixture the Go validator tests use.
 const spec = JSON.parse(
@@ -120,5 +120,59 @@ describe('step scenes', () => {
   it('pulls a part back from what it is fastened to', () => {
     const s = stepScene(spec, 6); // the drawer front goes on the drawer box
     expect(s.items.find((i) => i.part.id === 'drawer_front')!.offset!.z).toBeLessThan(0);
+  });
+});
+
+describe('fixings', () => {
+  const joint = (a: string, b: string) => spec.joints.find((j) => j.a === a && j.b === b)!;
+
+  it('screws through the side into the edge of the bottom, 50 mm from each end', () => {
+    const f = fixingOf(spec, joint('side_left', 'bottom'))!;
+    expect(f.through.id).toBe('side_left');
+    expect(f.axis).toBe('x');
+    expect(f.direction).toBe(1);
+    expect(f.entries.map((p) => p.x)).toEqual([0, 0, 0]);
+    expect(f.holes.map((p) => p.z)).toEqual([50, 197, 344]);
+    expect(f.holes.every((p) => p.x === 18 && p.y === 9)).toBe(true);
+  });
+
+  it('screws a drawer front on from inside the box, so no heads show', () => {
+    const f = fixingOf(spec, joint('drawer_front', 'drawer_front_inner'))!;
+    expect(f.through.id).toBe('drawer_front_inner');
+    expect(f.into.id).toBe('drawer_front');
+  });
+
+  it('nails the drawer bottom up into the box', () => {
+    const f = fixingOf(spec, joint('drawer_bottom', 'drawer_side_left'))!;
+    expect(f.through.id).toBe('drawer_bottom');
+    expect(f.direction).toBe(1);
+  });
+
+  it('spaces fixings from the ends, or centres a single one', () => {
+    expect(spread(394, 2)).toEqual([50, 344]);
+    expect(spread(100, 1)).toEqual([50]);
+    expect(spread(60, 3)).toEqual([10, 30, 50]);
+    expect(pilotHole(4)).toBe(2.5);
+  });
+
+  it('says how to fix each step, listing matching joints once', () => {
+    const { byPart } = labelParts(spec);
+    const lines = fixingLines(spec, 0, (id) => byPart.get(id)!.letter);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.times).toBe(2);
+    expect(lines[0]!.text).toContain('3 screws (4 × 40 mm) through B into C');
+    expect(lines[0]!.text).toContain('2.5 mm pilot holes');
+  });
+
+  it('fits the runners in the step that slides the drawer in', () => {
+    expect(stepFixings(spec, 5)).toHaveLength(0);
+    const { byPart } = labelParts(spec);
+    const lines = fixingLines(spec, 5, (id) => byPart.get(id)!.letter);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.text).toContain('runner');
+  });
+
+  it('draws a guide for every screw in a step', () => {
+    expect(stepScene(spec, 0).guides).toHaveLength(6);
   });
 });

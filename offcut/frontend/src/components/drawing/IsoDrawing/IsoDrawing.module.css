@@ -59,6 +59,24 @@
   vector-effect: non-scaling-stroke;
 }
 
+.guide line {
+  stroke: var(--draw-fixing);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.head {
+  fill: var(--draw-fixing);
+}
+
+.hole {
+  fill: var(--color-surface);
+  stroke: var(--draw-fixing);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
 .callout line {
   stroke: var(--draw-line);
   stroke-width: 1;

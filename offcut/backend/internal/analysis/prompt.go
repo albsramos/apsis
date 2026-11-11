@@ -40,7 +40,7 @@ Use stock thicknesses (6, 9, 12, 15, 18, 25 mm) unless the photos clearly show o
 
 Give every dimension a confidence: "measured" if it comes from the reference measurement, "derived" if you read it from proportions in the photos, "assumed" if it isn't visible. The user sees these and checks the weak ones with a tape measure, so be honest.
 
-Joints use one of: screw, pocket_screw, dowel, glue, groove, cam_lock, brad_nail, runner. Prefer what a beginner can do well: screws, dowels, pocket screws, glue. Name the hardware each joint consumes and its count.
+Joints use one of: screw, pocket_screw, dowel, glue, groove, cam_lock, brad_nail, runner. Prefer what a beginner can do well: screws, dowels, pocket screws, glue. Name the hardware each joint consumes and its count. Don't place fixings or write drilling instructions: the software puts screws and nails through the board whose face meets the other's edge, spaced from the ends of the joint, and says what holes to drill. Use a joint's "notes" only for something different, such as screwing from inside.
 
 Steps add a few parts at a time, in an order that can physically be done: nothing is fastened where a drill can no longer reach, and a box is square before its back goes on. Each step's text is one or two short sentences in the imperative, like a flat-pack manual. A step may add no parts if it only fits hardware.
 

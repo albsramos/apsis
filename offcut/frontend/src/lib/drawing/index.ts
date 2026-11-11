@@ -5,3 +5,5 @@ export * from './cutlist';
 export * from './ortho';
 export * from './iso';
 export * from './explode';
+export * from './assemblies';
+export * from './fixings';

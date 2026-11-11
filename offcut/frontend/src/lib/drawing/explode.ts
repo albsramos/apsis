@@ -1,5 +1,7 @@
 import type { Spec, Step, Vec3 } from '@/api';
 import { boxOf, center, pieceBox, union, type Axis, type Box } from './geometry';
+import { subAssemblies } from './assemblies';
+import { stepFixings } from './fixings';
 import { dominantAxis, ZERO, type IsoItem } from './iso';
 
 /** Every part pushed out from the piece's centre: the exploded view. */
@@ -19,26 +21,16 @@ export interface StepScene {
   moved: Set<string>;
   /** Arrows from where an added part is drawn to where it goes. */
   arrows: { partId: string; from: Vec3; to: Vec3 }[];
+  /**
+   * Where each screw, nail or dowel goes. A screw is a line from outside the
+   * board it goes through to where it comes out, with its hole marked on the
+   * other board; a dowel joins its two holes. All where the parts are drawn.
+   */
+  guides: { kind: 'screw' | 'dowel'; from: Vec3; to: Vec3; hole?: Vec3 }[];
 }
 
-/**
- * Sub-assemblies: parts joined by anything but runners belong together. A
- * drawer is one, the case another; runners only fit one into the other.
- */
-export function subAssemblies(spec: Spec): Map<string, string> {
-  const parent = new Map(spec.parts.map((p) => [p.id, p.id]));
-  const find = (id: string): string => {
-    const up = parent.get(id) ?? id;
-    if (up === id) return id;
-    const root = find(up);
-    parent.set(id, root);
-    return root;
-  };
-  for (const j of spec.joints) {
-    if (j.method !== 'runner' && parent.has(j.a) && parent.has(j.b)) parent.set(find(j.a), find(j.b));
-  }
-  return new Map(spec.parts.map((p) => [p.id, find(p.id)]));
-}
+/** How far outside its board a screw is drawn, before it goes in. */
+const LEAD = 40;
 
 /**
  * What a step's drawing shows. A step that builds a sub-assembly shows only
@@ -126,13 +118,17 @@ export function stepScene(spec: Spec, stepIndex: number): StepScene {
       .filter((id) => id !== part.id && inScene.has(id))
       .map((id) => byId.get(id)!);
     const pc = center(boxOf(part));
-    // Out through the faces it meets: a side leaves its bottom sideways. Faces
-    // on opposite sides (a shelf between two sides) cancel out, and then it
-    // moves away from the middle of what it joins.
+    // Out through the faces it meets: a side leaves its bottom sideways. A
+    // board with nothing on its faces, or on both (a shelf between two
+    // sides), moves away from the middle of what it joins.
     const push = { x: 0, y: 0, z: 0 };
+    const own = boxOf(part);
+    const thin = (['x', 'y', 'z'] as const).reduce((t, a) => (own.max[a] - own.min[a] < own.max[t] - own.min[t] ? a : t));
     for (const n of neighbours) {
-      const axis = meetingAxis(boxOf(part), boxOf(n));
-      if (axis) push[axis] += Math.sign(pc[axis] - center(boxOf(n))[axis]);
+      // Only through the board's own broad face: a drawer front leaves its
+      // sides forward, not up off the bottom its edge rests on.
+      const axis = meetingAxis(own, boxOf(n));
+      if (axis === thin) push[axis] += Math.sign(pc[axis] - center(boxOf(n))[axis]);
     }
     const from = neighbours.length ? neighbours : base.filter((p) => p.id !== part.id);
     const anchor = from.length ? center(union(from.map((p) => boxOf(p)))) : null;
@@ -146,7 +142,24 @@ export function stepScene(spec: Spec, stepIndex: number): StepScene {
     }
     items.push({ part, offset });
   }
-  return { items, added, moved, arrows };
+
+  const at = new Map(items.map((it) => [it.part.id, it.offset ?? ZERO]));
+  const plus = (p: Vec3, o: Vec3): Vec3 => ({ x: p.x + o.x, y: p.y + o.y, z: p.z + o.z });
+  const guides: StepScene['guides'] = [];
+  for (const f of stepFixings(spec, stepIndex)) {
+    const ot = at.get(f.through.id), oi = at.get(f.into.id);
+    if (!ot || !oi || f.joint.method === 'glue' || f.joint.method === 'groove') continue;
+    f.holes.forEach((hole, k) => {
+      if (f.joint.method === 'dowel') {
+        guides.push({ kind: 'dowel', from: plus(hole, ot), to: plus(hole, oi) });
+        return;
+      }
+      const entry = f.entries[k]!;
+      const start = { ...entry, [f.axis]: entry[f.axis] - f.direction * LEAD };
+      guides.push({ kind: 'screw', from: plus(start, ot), to: plus(hole, ot), hole: plus(hole, oi) });
+    });
+  }
+  return { items, added, moved, arrows, guides };
 }
 
 /** The axis two boxes meet across, face to face, if they do. */

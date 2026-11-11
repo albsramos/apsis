@@ -30,6 +30,8 @@
   --draw-line: var(--color-ink);
   --draw-hidden: var(--color-ink-muted);
   --draw-dimension: var(--color-accent);
+  /* where screws, nails and dowels go, in the step drawings */
+  --draw-fixing: var(--color-accent);
   --draw-face-front: #ffffff;
   --draw-face-top: #f4f5f2;
   --draw-face-side: #e2e5df;

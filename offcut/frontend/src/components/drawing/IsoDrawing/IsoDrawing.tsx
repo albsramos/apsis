@@ -12,6 +12,8 @@ export interface IsoDrawingProps {
   /** Which parts get a callout; all lettered parts if left out. */
   callouts?: Set<string>;
   arrows?: { from: Vec3; to: Vec3 }[];
+  /** Where screws, nails and dowels go: dashed from each fixing to its hole. */
+  guides?: { kind: 'screw' | 'dowel'; from: Vec3; to: Vec3; hole?: Vec3 }[];
   onSelect?: (partId: string) => void;
   label: string;
   /** Thicker lines and bigger letters, for reading at arm's length. */
@@ -19,9 +21,14 @@ export interface IsoDrawingProps {
 }
 
 /** An isometric line drawing of boards, like a flat-pack manual. */
-export function IsoDrawing({ items, highlight, selected, letters, callouts, arrows, onSelect, label, bold }: IsoDrawingProps) {
+export function IsoDrawing({ items, highlight, selected, letters, callouts, arrows, guides, onSelect, label, bold }: IsoDrawingProps) {
   const scene = isoScene(items);
-  const { minX, minY, maxX, maxY } = scene.bounds;
+  const lines = (guides ?? []).map((g) => ({ kind: g.kind, from: toScreen(g.from), to: toScreen(g.to), hole: toScreen(g.hole ?? g.to) }));
+  const ends = lines.flatMap((l) => [l.from, l.to, l.hole]);
+  const minX = Math.min(scene.bounds.minX, ...ends.map((p) => p.x));
+  const maxX = Math.max(scene.bounds.maxX, ...ends.map((p) => p.x));
+  const minY = Math.min(scene.bounds.minY, ...ends.map((p) => p.y));
+  const maxY = Math.max(scene.bounds.maxY, ...ends.map((p) => p.y));
   const size = Math.max(maxX - minX, maxY - minY, 1);
   const pad = size * 0.1;
   const r = size * (bold ? 0.04 : 0.03);
@@ -59,6 +66,13 @@ export function IsoDrawing({ items, highlight, selected, letters, callouts, arro
           />
         );
       })}
+      {lines.map((l, i) => (
+        <g key={`g${i}`} className={styles.guide} aria-hidden="true">
+          <line x1={l.from.x} y1={l.from.y} x2={l.to.x} y2={l.to.y} />
+          {l.kind === 'screw' ? <circle className={styles.head} cx={l.from.x} cy={l.from.y} r={r * 0.22} /> : <circle className={styles.hole} cx={l.from.x} cy={l.from.y} r={r * 0.16} />}
+          <circle className={styles.hole} cx={l.hole.x} cy={l.hole.y} r={r * 0.16} />
+        </g>
+      ))}
       {arrows?.map((ar, i) => {
         const from = toScreen(ar.from);
         const to = toScreen(ar.to);

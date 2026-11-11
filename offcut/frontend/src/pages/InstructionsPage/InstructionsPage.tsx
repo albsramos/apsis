@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { Spec } from '@/api';
 import { IsoDrawing } from '@/components/drawing';
 import { Button, Callout, Dialog, IconButton, Spinner } from '@/components/ui';
-import { labelParts, stepScene, type Labels } from '@/lib/drawing';
+import { fixingLines, labelParts, stepScene, type Labels } from '@/lib/drawing';
 import { useProject, useWakeLock } from '@/lib/hooks';
 import { HardwareGlyph } from './HardwareGlyph';
 import styles from './InstructionsPage.module.css';
@@ -163,6 +163,7 @@ function Step({ spec, labels, index, swipe }: { spec: Spec; labels: Labels; inde
           letters={letters}
           callouts={scene.added}
           arrows={scene.arrows}
+          guides={scene.guides}
           label={`Step ${index + 1}: ${step.title}. ${step.text}`}
         />
       </div>
@@ -182,6 +183,7 @@ function YouNeed({ spec, labels, index }: { spec: Spec; labels: Labels; index: n
     byLetter.set(g.letter, e);
   }
   const hw = new Map(spec.hardware.map((h) => [h.id, h]));
+  const how = fixingLines(spec, index, (id) => labels.byPart.get(id)?.letter ?? id);
   if (byLetter.size === 0 && step.hardware.length === 0) return null;
   return (
     <aside className={styles.need} aria-label="You need">
@@ -205,6 +207,19 @@ function YouNeed({ spec, labels, index }: { spec: Spec; labels: Labels; index: n
           );
         })}
       </ul>
+      {how.length > 0 && (
+        <>
+          <div className={styles.needLabel}>HOW TO FIX IT</div>
+          <ul className={styles.howList}>
+            {how.map((l) => (
+              <li key={`${l.through}-${l.into}-${l.text}`}>
+                {l.times > 1 && <strong>{l.times === 2 ? 'At both joints: ' : `At each of ${l.times} joints: `}</strong>}
+                {l.text}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </aside>
   );
 }

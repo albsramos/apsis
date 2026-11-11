@@ -143,12 +143,12 @@
    "material": "12 mm plywood",
    "position": {
     "x": 30.5,
-    "y": 385,
+    "y": 391,
     "z": 18
    },
    "size": {
     "x": 12,
-    "y": 120,
+    "y": 114,
     "z": 350
    },
    "confidence": {
@@ -163,12 +163,12 @@
    "material": "12 mm plywood",
    "position": {
     "x": 407.5,
-    "y": 385,
+    "y": 391,
     "z": 18
    },
    "size": {
     "x": 12,
-    "y": 120,
+    "y": 114,
     "z": 350
    },
    "confidence": {
@@ -183,12 +183,12 @@
    "material": "12 mm plywood",
    "position": {
     "x": 42.5,
-    "y": 385,
+    "y": 391,
     "z": 18
    },
    "size": {
     "x": 365,
-    "y": 120,
+    "y": 114,
     "z": 12
    },
    "confidence": {
@@ -203,12 +203,12 @@
    "material": "12 mm plywood",
    "position": {
     "x": 42.5,
-    "y": 385,
+    "y": 391,
     "z": 356
    },
    "size": {
     "x": 365,
-    "y": 120,
+    "y": 114,
     "z": 12
    },
    "confidence": {
@@ -222,20 +222,21 @@
    "name": "Drawer bottom",
    "material": "6 mm plywood",
    "position": {
-    "x": 42.5,
+    "x": 30.5,
     "y": 385,
-    "z": 30
+    "z": 18
    },
    "size": {
-    "x": 365,
+    "x": 389,
     "y": 6,
-    "z": 326
+    "z": 350
    },
    "confidence": {
     "x": "derived",
     "y": "assumed",
     "z": "derived"
-   }
+   },
+   "notes": "Nailed up into the bottom edges of the box sides, front and back."
   },
   {
    "id": "drawer_front",
@@ -365,6 +366,20 @@
    "hardware": "brad_30"
   },
   {
+   "a": "drawer_bottom",
+   "b": "drawer_front_inner",
+   "method": "brad_nail",
+   "count": 2,
+   "hardware": "brad_30"
+  },
+  {
+   "a": "drawer_bottom",
+   "b": "drawer_back",
+   "method": "brad_nail",
+   "count": 2,
+   "hardware": "brad_30"
+  },
+  {
    "a": "drawer_side_left",
    "b": "side_left",
    "method": "runner",
@@ -392,17 +407,17 @@
  "hardware": [
   {
    "id": "dowel_8",
-   "name": "Dowel, 8 \u00d7 40 mm",
+   "name": "Dowel, 8 × 40 mm",
    "quantity": 4
   },
   {
    "id": "screw_4x40",
-   "name": "Wood screw, 4 \u00d7 40 mm",
+   "name": "Wood screw, 4 × 40 mm",
    "quantity": 10
   },
   {
    "id": "screw_3x25",
-   "name": "Wood screw, 3.5 \u00d7 25 mm",
+   "name": "Wood screw, 3.5 × 25 mm",
    "quantity": 4
   },
   {
@@ -478,7 +493,7 @@
   },
   {
    "title": "Drawer box",
-   "text": "Nail the box front and back between the drawer sides, then nail the bottom in.",
+   "text": "Nail the box front and back between the drawer sides. Nail the bottom on underneath.",
    "parts": [
     "drawer_side_left",
     "drawer_side_right",
@@ -489,7 +504,7 @@
    "hardware": [
     {
      "id": "brad_30",
-     "quantity": 18
+     "quantity": 22
     }
    ]
   },
